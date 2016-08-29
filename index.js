@@ -77,6 +77,16 @@ Choices.prototype.get = function(idx) {
 };
 
 /**
+ * Toggle the choice at the given `idx`.
+ * @param  {Number} `idx`  The index of the choice to toggle.
+ */
+
+Choices.prototype.toggle = function(idx) {
+  var checked = this.getChoice(idx).checked;
+  this.getChoice(idx).checked = !checked;
+};
+
+/**
  * Match the valid choices against a where clause
  * @param  {Object} whereClause Lodash `where` clause
  * @return {Array}              Matching choices or empty array
