@@ -1,12 +1,12 @@
 {
-  "name": "enquirer-choices",
-  "description": "Create an array of multiple choice objects, for Enquirer prompts. Should work with Inquirer too.",
+  "name": "prompt-choices",
+  "description": "Create an array of multiple choice objects for use in prompts.",
   "version": "0.1.0",
-  "homepage": "https://github.com/jonschlinkert/enquirer-choices",
+  "homepage": "https://github.com/enquirer/prompt-choices",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
-  "repository": "jonschlinkert/enquirer-choices",
+  "repository": "enquirer/prompt-choices",
   "bugs": {
-    "url": "https://github.com/jonschlinkert/enquirer-choices/issues"
+    "url": "https://github.com/enquirer/prompt-choices/issues"
   },
   "license": "MIT",
   "files": [
@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "arr-flatten": "^1.0.1",
+    "choices-separator": "^0.1.0",
     "define-property": "^0.2.5",
-    "enquirer-separator": "^0.1.0",
     "extend-shallow": "^2.0.1",
     "is-number": "^2.1.0",
     "isobject": "^2.1.0",

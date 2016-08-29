@@ -1,6 +1,6 @@
 'use strict';
 
-var Separator = require('enquirer-separator');
+var Separator = require('choices-separator');
 var Choice = require('./lib/choice');
 var utils = require('./lib/utils');
 
