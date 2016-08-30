@@ -25,7 +25,7 @@ gulp.task('eslint', function() {
 });
 
 gulp.task('unused', function() {
-  return gulp.src(['index.js', 'lib/**/*.js'])
+  return gulp.src(['index.js', 'lib/*.js'])
     .pipe(unused({utils: 'lib/utils.js'}));
 });
 
