@@ -16,8 +16,7 @@ var utils = require('./lib/utils');
  * @api public
  */
 
-function Choices(choices, answers) {
-  this.answers = answers;
+function Choices(choices) {
   this.choices = [];
   this.checked = {};
   this.keymap = {};
@@ -48,8 +47,8 @@ Choices.prototype.addChoices = function(choices) {
         choice = new Separator(choice.line);
       }
     } else {
-      choice = new Choice(choice, this.answers);
-      this.keymap[choice.key] = choice;
+      choice = new Choice(choice);
+      this.keymap[choice.key || choice.name] = choice;
     }
     // push normalized "choice" object onto array
     this.choices.push(choice);
