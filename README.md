@@ -17,6 +17,173 @@ var Choices = require('prompt-choices');
 var choices = new Choices(['foo', 'bar', 'baz']);
 ```
 
+## API
+
+### [Choices](index.js#L19)
+
+Create a new `Choices` collection.
+
+**Params**
+
+* `choices` **{Array}**: One or more `choice` strings or objects.
+
+**Example**
+
+```js
+var choices = new Choices(['foo', 'bar', 'baz']);
+var choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
+```
+
+### [.addChoices](index.js#L39)
+
+Add an array of normalized `choice` objects to the `choices` array. This method is called in the constructor, but it can also be used to add choices after instantiation.
+
+**Params**
+
+* `choices` **{Array|Object}**: One or more choices to add.
+
+**Example**
+
+```js
+choices.addChoices(['a', 'b', 'c']);
+```
+
+### [.getChoice](index.js#L70)
+
+Get a non-separator choice from the collection.
+
+**Params**
+
+* `idx` **{Number}**: The selected choice index
+* `returns` **{Object|undefined}**: Return the matched choice object or undefined
+
+**Example**
+
+```js
+choices.getChoice(1);
+```
+
+### [.getIndex](index.js#L90)
+
+Get the index of a non-separator choice from the collection.
+
+**Params**
+
+* `key` **{String}**: The key of the choice to get
+* `returns` **{Number}**: Index of the choice or `-1`;
+
+**Example**
+
+```js
+choices.getChoice('foo');
+```
+
+### [.get](index.js#L111)
+
+Get the choice or separator object at the specified index.
+
+**Params**
+
+* `idx` **{Number}**: The index of the object to get
+* `returns` **{Object}**: Returns the specified choice
+
+**Example**
+
+```js
+choices.getChoice(1);
+```
+
+### [.enable](index.js#L128)
+
+Enable the choice at the given `idx`.
+
+**Params**
+
+* `idx` **{Number}**: The index of the choice to enable.
+
+**Example**
+
+```js
+choices.enable(1);
+```
+
+### [.disable](index.js#L143)
+
+Disable the choice at the given `idx`.
+
+**Params**
+
+* `idx` **{Number}**: The index of the choice to enable.
+
+**Example**
+
+```js
+choices.disable(1);
+```
+
+### [.toggleChoices](index.js#L158)
+
+Enable the choice at the given `index`, and disable all other choices.
+
+**Params**
+
+* `idx` **{Number}**: The index of the choice to toggle.
+
+**Example**
+
+```js
+choices.toggleChoices(1);
+```
+
+### [.toggleChoice](index.js#L173)
+
+Toggle the choice at the given `idx`.
+
+**Params**
+
+* `idx` **{Number}**: The index of the choice to toggle.
+
+**Example**
+
+```js
+choices.toggleChoice(1);
+```
+
+### [.where](index.js#L187)
+
+Return choices that return truthy based on the given `val`.
+
+**Params**
+
+* `val` **{Object|Function|String}**
+* `returns` **{Array}**: Matching choices or empty array
+
+### [.pluck](index.js#L217)
+
+Pluck an object with the specified key from the choices collection.
+
+**Params**
+
+* `key` **{String}**: Property name to use for plucking objects.
+* `returns` **{Array}**: Plucked objects
+
+### [.realChoices](index.js#L256)
+
+Getter for getting all non-separator choices from the collection.
+
+### [.realLength](index.js#L279)
+
+Getter for getting the length of the collection excluding non-separator choices.
+
+### [.length](index.js#L294)
+
+Getter for getting the length of the collection.
+
+### [.all](index.js#L311)
+
+Getter for getting all choices from the collection. Alias to allow using
+`.choices.all` instead of `.choices.choices`.
+
 ## Attribution
 
 Code is partially based on the `Choices` class in Inquirer.
