@@ -16,10 +16,14 @@ var utils = require('./lib/utils');
  * @api public
  */
 
-function Choices(choices) {
-  this.choices = [];
-  this.checked = {};
+function Choices(choices, answers) {
+  choices = choices || [];
+  utils.define(this, 'isChoices', true);
+  utils.define(this, 'answers', answers || {});
+  this.original = choices.slice();
   this.keymap = {};
+  this.items = [];
+  this.keys = [];
   this.addChoices(choices);
 }
 
@@ -47,12 +51,44 @@ Choices.prototype.addChoices = function(choices) {
         choice = new Separator(choice.line);
       }
     } else {
-      choice = new Choice(choice);
-      this.keymap[choice.key || choice.name] = choice;
+      choice = this.choice(choice);
+      var key = choice.key || choice.name;
+      this.keymap[key] = choice;
+      this.keys.push(key);
     }
     // push normalized "choice" object onto array
-    this.choices.push(choice);
+    this.push(choice);
   }
+};
+
+/**
+ * Create a new `Choice` object.
+ *
+ * ```js
+ * choices.choice('blue');
+ * ```
+ * @param {String|Object} `choice`
+ * @return {Object} Returns a choice object.
+ * @api public
+ */
+
+Choices.prototype.choice = function(choice) {
+  return new Choice(choice, this.answers);
+};
+
+/**
+ * Create a new `Separator` object. See [choices-separator][] for more details.
+ *
+ * ```js
+ * choices.separator();
+ * ```
+ * @param {String} `separator` Optionally pass a string to use as the separator.
+ * @return {Object} Returns a separator object.
+ * @api public
+ */
+
+Choices.prototype.separator = function(separator, options) {
+  return new Separator(separator, options);
 };
 
 /**
@@ -111,7 +147,7 @@ Choices.prototype.get = function(idx) {
   if (!utils.isNumber(idx)) {
     throw new TypeError('expected index to be a number');
   }
-  return this.choices[idx];
+  return this.items[idx];
 };
 
 /**
@@ -155,7 +191,7 @@ Choices.prototype.disable = function(idx) {
  */
 
 Choices.prototype.toggleChoices = function(idx) {
-  toggleArray(this.choices, 'checked', idx);
+  toggleArray(this.items, 'checked', idx);
   return this;
 };
 
@@ -170,8 +206,8 @@ Choices.prototype.toggleChoices = function(idx) {
  */
 
 Choices.prototype.toggleChoice = function(idx) {
-  var enabled = this.getChoice(idx).checked;
-  this.getChoice(idx).checked = !enabled;
+  var checked = this.getChoice(idx).checked;
+  this.getChoice(idx).checked = !checked;
   return this;
 };
 
@@ -188,8 +224,13 @@ Choices.prototype.where = function(val) {
     if (typeof val === 'function') {
       return val(choice);
     }
+
     if (typeof val === 'string') {
-      return !!choice[val];
+      return choice.name === val || choice.key === val;
+    }
+
+    if (val instanceof RegExp) {
+      return val.test(choice.name) || val.test(choice.key);
     }
 
     if (utils.isObject(val)) {
@@ -219,16 +260,20 @@ Choices.prototype.pluck = function(key) {
   });
 };
 
+/**
+ * Convenience array methods
+ */
+
 Choices.prototype.indexOf = function() {
-  return this.choices.indexOf.apply(this.choices, arguments);
+  return this.getChoice(this.keys.indexOf.apply(this.keys, arguments));
 };
 
 Choices.prototype.forEach = function() {
-  return this.choices.forEach.apply(this.choices, arguments);
+  return this.items.forEach.apply(this.items, arguments);
 };
 
 Choices.prototype.filter = function() {
-  return this.choices.filter.apply(this.choices, arguments);
+  return this.items.filter.apply(this.items, arguments);
 };
 
 Choices.prototype.push = function() {
@@ -238,13 +283,28 @@ Choices.prototype.push = function() {
 
   while (++idx < len) {
     var choice = choices[idx];
-    this.choices.push(new Choice(choice));
+    this.items.push(new Choice(choice));
     if (choice.type !== 'separator') {
       this.realChoices.push(choice);
     }
   }
-  return this.choices;
+  return this.items;
 };
+
+/**
+ * Getter for getting the length of the collection.
+ * @name .length
+ * @api public
+ */
+
+Object.defineProperty(Choices.prototype, 'length', {
+  set: function() {
+    throw new Error('.length is a getter and cannot be defined');
+  },
+  get: function() {
+    return this.items.length;
+  }
+});
 
 /**
  * Getter for getting all non-separator choices from the collection.
@@ -260,7 +320,7 @@ Object.defineProperty(Choices.prototype, 'realChoices', {
     var choices = [];
     var idx = -1;
     while (++idx < this.length) {
-      var choice = this.choices[idx];
+      var choice = this.items[idx];
       if (choice.type !== 'separator' && !choice.disabled) {
         choices.push(choice);
       }
@@ -285,35 +345,20 @@ Object.defineProperty(Choices.prototype, 'realLength', {
 });
 
 /**
- * Getter for getting the length of the collection.
- * @name .length
+ * Create a new `Separator` object. See [choices-separator][] for more details.
+ *
+ * ```js
+ * new Choices.Separator();
+ * ```
+ * @param {String} `separator` Optionally pass a string to use as the separator.
+ * @return {Object} Returns a separator object.
  * @api public
  */
 
-Object.defineProperty(Choices.prototype, 'length', {
-  set: function() {
-    throw new Error('.length is a getter and cannot be defined');
-  },
-  get: function() {
-    return this.choices.length;
-  }
-});
+Choices.Separator = Separator;
 
 /**
- * Getter for getting all choices from the collection. Alias to allow using
- * `.choices.all` instead of `.choices.choices`.
- *
- * @name .all
- * @api public
+ * Expose `Choices`
  */
-
-Object.defineProperty(Choices.prototype, 'all', {
-  set: function() {
-    throw new Error('.all is a getter and cannot be defined');
-  },
-  get: function() {
-    return this.choices;
-  }
-});
 
 module.exports = Choices;
