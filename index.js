@@ -17,10 +17,12 @@ var utils = require('./lib/utils');
  */
 
 function Choices(choices, answers) {
-  choices = choices || [];
+  if (utils.isObject(choices) && choices.isChoices) {
+    return choices;
+  }
   utils.define(this, 'isChoices', true);
   utils.define(this, 'answers', answers || {});
-  this.original = choices.slice();
+  this.original = utils.arrayify(choices).slice();
   this.keymap = {};
   this.items = [];
   this.keys = [];
