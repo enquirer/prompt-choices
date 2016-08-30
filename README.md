@@ -34,7 +34,7 @@ var choices = new Choices(['foo', 'bar', 'baz']);
 var choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
 ```
 
-### [.addChoices](index.js#L42)
+### [.addChoices](index.js#L44)
 
 Add an array of normalized `choice` objects to the `choices` array. This method is called in the constructor, but it can also be used to add choices after instantiation.
 
@@ -48,7 +48,7 @@ Add an array of normalized `choice` objects to the `choices` array. This method 
 choices.addChoices(['a', 'b', 'c']);
 ```
 
-### [.choice](index.js#L75)
+### [.choice](index.js#L77)
 
 Create a new `Choice` object.
 
@@ -63,7 +63,7 @@ Create a new `Choice` object.
 choices.choice('blue');
 ```
 
-### [.separator](index.js#L90)
+### [.separator](index.js#L92)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -78,7 +78,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 choices.separator();
 ```
 
-### [.getChoice](index.js#L105)
+### [.getChoice](index.js#L107)
 
 Get a non-separator choice from the collection.
 
@@ -93,7 +93,7 @@ Get a non-separator choice from the collection.
 choices.getChoice(1);
 ```
 
-### [.getIndex](index.js#L125)
+### [.getIndex](index.js#L127)
 
 Get the index of a non-separator choice from the collection.
 
@@ -108,7 +108,7 @@ Get the index of a non-separator choice from the collection.
 choices.getChoice('foo');
 ```
 
-### [.get](index.js#L146)
+### [.get](index.js#L148)
 
 Get the choice or separator object at the specified index.
 
@@ -123,7 +123,7 @@ Get the choice or separator object at the specified index.
 choices.getChoice(1);
 ```
 
-### [.enable](index.js#L163)
+### [.enable](index.js#L165)
 
 Enable the choice at the given `idx`.
 
@@ -137,7 +137,7 @@ Enable the choice at the given `idx`.
 choices.enable(1);
 ```
 
-### [.disable](index.js#L178)
+### [.disable](index.js#L180)
 
 Disable the choice at the given `idx`.
 
@@ -151,7 +151,7 @@ Disable the choice at the given `idx`.
 choices.disable(1);
 ```
 
-### [.toggleChoices](index.js#L193)
+### [.toggleChoices](index.js#L195)
 
 Enable the choice at the given `index`, and disable all other choices.
 
@@ -165,7 +165,7 @@ Enable the choice at the given `index`, and disable all other choices.
 choices.toggleChoices(1);
 ```
 
-### [.toggleChoice](index.js#L208)
+### [.toggleChoice](index.js#L210)
 
 Toggle the choice at the given `idx`.
 
@@ -179,7 +179,7 @@ Toggle the choice at the given `idx`.
 choices.toggleChoice(1);
 ```
 
-### [.where](index.js#L222)
+### [.where](index.js#L224)
 
 Return choices that return truthy based on the given `val`.
 
@@ -188,7 +188,7 @@ Return choices that return truthy based on the given `val`.
 * `val` **{Object|Function|String}**
 * `returns` **{Array}**: Matching choices or empty array
 
-### [.pluck](index.js#L257)
+### [.pluck](index.js#L259)
 
 Pluck an object with the specified key from the choices collection.
 
@@ -197,19 +197,19 @@ Pluck an object with the specified key from the choices collection.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.length](index.js#L300)
+### [.length](index.js#L302)
 
 Getter for getting the length of the collection.
 
-### [.realChoices](index.js#L315)
+### [.realChoices](index.js#L317)
 
 Getter for getting all non-separator choices from the collection.
 
-### [.realLength](index.js#L338)
+### [.realLength](index.js#L340)
 
 Getter for getting the length of the collection excluding non-separator choices.
 
-### [.Separator](index.js#L358)
+### [.Separator](index.js#L360)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
