@@ -1,4 +1,4 @@
-# prompt-choices [![NPM version](https://img.shields.io/npm/v/prompt-choices.svg?style=flat)](https://www.npmjs.com/package/prompt-choices) [![NPM downloads](https://img.shields.io/npm/dm/prompt-choices.svg?style=flat)](https://npmjs.org/package/prompt-choices)
+# prompt-choices [![NPM version](https://img.shields.io/npm/v/prompt-choices.svg?style=flat)](https://www.npmjs.com/package/prompt-choices) [![NPM downloads](https://img.shields.io/npm/dm/prompt-choices.svg?style=flat)](https://npmjs.org/package/prompt-choices) [![Build Status](https://img.shields.io/travis/enquirer/prompt-choices.svg?style=flat)](https://travis-ci.org/enquirer/prompt-choices)
 
 > Create an array of multiple choice objects for use in prompts.
 
@@ -34,7 +34,7 @@ var choices = new Choices(['foo', 'bar', 'baz']);
 var choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
 ```
 
-### [.addChoices](index.js#L39)
+### [.addChoices](index.js#L42)
 
 Add an array of normalized `choice` objects to the `choices` array. This method is called in the constructor, but it can also be used to add choices after instantiation.
 
@@ -48,7 +48,37 @@ Add an array of normalized `choice` objects to the `choices` array. This method 
 choices.addChoices(['a', 'b', 'c']);
 ```
 
-### [.getChoice](index.js#L70)
+### [.choice](index.js#L75)
+
+Create a new `Choice` object.
+
+**Params**
+
+* `choice` **{String|Object}**
+* `returns` **{Object}**: Returns a choice object.
+
+**Example**
+
+```js
+choices.choice('blue');
+```
+
+### [.separator](index.js#L90)
+
+Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
+
+**Params**
+
+* `separator` **{String}**: Optionally pass a string to use as the separator.
+* `returns` **{Object}**: Returns a separator object.
+
+**Example**
+
+```js
+choices.separator();
+```
+
+### [.getChoice](index.js#L105)
 
 Get a non-separator choice from the collection.
 
@@ -63,7 +93,7 @@ Get a non-separator choice from the collection.
 choices.getChoice(1);
 ```
 
-### [.getIndex](index.js#L90)
+### [.getIndex](index.js#L125)
 
 Get the index of a non-separator choice from the collection.
 
@@ -78,7 +108,7 @@ Get the index of a non-separator choice from the collection.
 choices.getChoice('foo');
 ```
 
-### [.get](index.js#L111)
+### [.get](index.js#L146)
 
 Get the choice or separator object at the specified index.
 
@@ -93,7 +123,7 @@ Get the choice or separator object at the specified index.
 choices.getChoice(1);
 ```
 
-### [.enable](index.js#L128)
+### [.enable](index.js#L163)
 
 Enable the choice at the given `idx`.
 
@@ -107,7 +137,7 @@ Enable the choice at the given `idx`.
 choices.enable(1);
 ```
 
-### [.disable](index.js#L143)
+### [.disable](index.js#L178)
 
 Disable the choice at the given `idx`.
 
@@ -121,7 +151,7 @@ Disable the choice at the given `idx`.
 choices.disable(1);
 ```
 
-### [.toggleChoices](index.js#L158)
+### [.toggleChoices](index.js#L193)
 
 Enable the choice at the given `index`, and disable all other choices.
 
@@ -135,7 +165,7 @@ Enable the choice at the given `index`, and disable all other choices.
 choices.toggleChoices(1);
 ```
 
-### [.toggleChoice](index.js#L173)
+### [.toggleChoice](index.js#L208)
 
 Toggle the choice at the given `idx`.
 
@@ -149,7 +179,7 @@ Toggle the choice at the given `idx`.
 choices.toggleChoice(1);
 ```
 
-### [.where](index.js#L187)
+### [.where](index.js#L222)
 
 Return choices that return truthy based on the given `val`.
 
@@ -158,7 +188,7 @@ Return choices that return truthy based on the given `val`.
 * `val` **{Object|Function|String}**
 * `returns` **{Array}**: Matching choices or empty array
 
-### [.pluck](index.js#L217)
+### [.pluck](index.js#L257)
 
 Pluck an object with the specified key from the choices collection.
 
@@ -167,22 +197,32 @@ Pluck an object with the specified key from the choices collection.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.realChoices](index.js#L256)
-
-Getter for getting all non-separator choices from the collection.
-
-### [.realLength](index.js#L279)
-
-Getter for getting the length of the collection excluding non-separator choices.
-
-### [.length](index.js#L294)
+### [.length](index.js#L300)
 
 Getter for getting the length of the collection.
 
-### [.all](index.js#L311)
+### [.realChoices](index.js#L315)
 
-Getter for getting all choices from the collection. Alias to allow using
-`.choices.all` instead of `.choices.choices`.
+Getter for getting all non-separator choices from the collection.
+
+### [.realLength](index.js#L338)
+
+Getter for getting the length of the collection excluding non-separator choices.
+
+### [.Separator](index.js#L358)
+
+Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
+
+**Params**
+
+* `separator` **{String}**: Optionally pass a string to use as the separator.
+* `returns` **{Object}**: Returns a separator object.
+
+**Example**
+
+```js
+new Choices.Separator();
+```
 
 ## Attribution
 
@@ -226,4 +266,4 @@ Released under the [MIT license](https://github.com/enquirer/prompt-choices/blob
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.1.30, on August 29, 2016._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.1.30, on August 30, 2016._
