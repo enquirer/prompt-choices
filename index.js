@@ -1,9 +1,9 @@
 'use strict';
 
-var toggleArray = require('toggle-array');
-var Separator = require('choices-separator');
+var debug = require('debug')('prompt-choices');
 var Choice = require('./lib/choice');
 var utils = require('./lib/utils');
+var Move = require('./lib/move');
 
 /**
  * Create a new `Choices` collection.
@@ -16,18 +16,50 @@ var utils = require('./lib/utils');
  * @api public
  */
 
-function Choices(choices, answers) {
+function Choices(choices, options) {
+  debug('initializing from <%s>', __filename);
   if (utils.isObject(choices) && choices.isChoices) {
     return choices;
   }
+  this.options = options || {};
   utils.define(this, 'isChoices', true);
-  utils.define(this, 'answers', answers || {});
-  this.original = utils.arrayify(choices).slice();
+  utils.define(this, 'answers', this.options.answers || {});
+  this.paginator = new utils.Paginator(this.options);
+  this.original = utils.clone(choices);
+  this.choices = [];
   this.keymap = {};
   this.items = [];
   this.keys = [];
   this.addChoices(choices);
 }
+
+/**
+ * Render the current choices.
+ *
+ * @param {Number} `position` Cursor position
+ * @param {Object} `options`
+ * @return {String}
+ * @api public
+ */
+
+Choices.prototype.render = function(position, options) {
+  var opts = utils.extend({}, this.options, options);
+  var len = this.choices.length;
+  var num = opts.limit || 7;
+  var idx = -1;
+  var buf = '';
+
+  position = position || 0;
+  while (++idx < len) {
+    buf += this.choices[idx].render(position);
+  }
+
+  var str = '\n' + buf.replace(/\n$/, '');
+  if (len > num && opts.paginate) {
+    return this.paginator.paginate(str, position, num);
+  }
+  return str;
+};
 
 /**
  * Add an array of normalized `choice` objects to the `choices` array. This
@@ -45,21 +77,27 @@ Choices.prototype.addChoices = function(choices) {
   choices = utils.arrayify(choices);
   var len = choices.length;
   var idx = -1;
-
+  var i = 0;
   while (++idx < len) {
     var choice = choices[idx];
     if (choice.type === 'separator') {
       if (!choice.isSeparator) {
-        choice = new Separator(choice.line);
+        choice = new utils.Separator(choice.line);
       }
+
+    } else if (choice.disabled) {
+      choice = this.choice(choice);
+
     } else {
       choice = this.choice(choice);
-      var key = choice.key || choice.name;
-      this.keymap[key] = choice;
-      this.keys.push(key);
+      choice.index = i;
+      i++;
+      this.keymap[choice.key] = choice;
+      this.keys.push(choice.key);
+      this.items.push(choice);
     }
     // push normalized "choice" object onto array
-    this.push(choice);
+    this.choices.push(choice);
   }
 };
 
@@ -75,7 +113,7 @@ Choices.prototype.addChoices = function(choices) {
  */
 
 Choices.prototype.choice = function(choice) {
-  return new Choice(choice, this.answers);
+  return new Choice(choice, this.options);
 };
 
 /**
@@ -90,7 +128,7 @@ Choices.prototype.choice = function(choice) {
  */
 
 Choices.prototype.separator = function(separator, options) {
-  return new Separator(separator, options);
+  return new utils.Separator(separator, options);
 };
 
 /**
@@ -105,12 +143,10 @@ Choices.prototype.separator = function(separator, options) {
  */
 
 Choices.prototype.getChoice = function(idx) {
-  if (utils.isNumber(idx) && idx !== ' ') {
-    return this.realChoices[idx];
-  }
   if (typeof idx === 'string') {
-    return this.keymap[idx];
+    idx = this.getIndex(idx);
   }
+  return this.items[idx];
 };
 
 /**
@@ -125,7 +161,7 @@ Choices.prototype.getChoice = function(idx) {
  */
 
 Choices.prototype.getIndex = function(key) {
-  if (utils.isNumber(key) && key !== -1 && key < this.realLength) {
+  if (utils.isNumber(key) && key !== -1 && key < this.items.length) {
     return key;
   }
   if (typeof key === 'string') {
@@ -163,7 +199,7 @@ Choices.prototype.get = function(idx) {
  */
 
 Choices.prototype.enable = function(idx) {
-  this.getChoice(idx).checked = true;
+  this.getChoice(idx).enable('checked');
   return this;
 };
 
@@ -178,22 +214,7 @@ Choices.prototype.enable = function(idx) {
  */
 
 Choices.prototype.disable = function(idx) {
-  this.getChoice(idx).checked = false;
-  return this;
-};
-
-/**
- * Enable the choice at the given `index`, and disable all other choices.
- *
- * ```js
- * choices.toggleChoices(1);
- * ```
- * @param {Number} `idx` The index of the choice to toggle.
- * @api public
- */
-
-Choices.prototype.toggleChoices = function(idx) {
-  toggleArray(this.items, 'checked', idx);
+  this.getChoice(idx).disable('checked');
   return this;
 };
 
@@ -201,15 +222,20 @@ Choices.prototype.toggleChoices = function(idx) {
  * Toggle the choice at the given `idx`.
  *
  * ```js
- * choices.toggleChoice(1);
+ * choices.toggle(1);
+ * // radio mode
+ * choices.toggle(1, true);
  * ```
  * @param {Number} `idx` The index of the choice to toggle.
  * @api public
  */
 
-Choices.prototype.toggleChoice = function(idx) {
-  var checked = this.getChoice(idx).checked;
-  this.getChoice(idx).checked = !checked;
+Choices.prototype.toggle = function(idx, radio) {
+  if (radio) {
+    utils.toggleArray(this.items, 'checked', idx);
+  } else {
+    this.items[idx].toggle();
+  }
   return this;
 };
 
@@ -222,7 +248,7 @@ Choices.prototype.toggleChoice = function(idx) {
  */
 
 Choices.prototype.where = function(val) {
-  return this.realChoices.filter(function(choice) {
+  return this.items.filter(function(choice) {
     if (typeof val === 'function') {
       return val(choice);
     }
@@ -257,7 +283,7 @@ Choices.prototype.where = function(val) {
  */
 
 Choices.prototype.pluck = function(key) {
-  return this.realChoices.map(function(choice) {
+  return this.items.map(function(choice) {
     return choice[key];
   });
 };
@@ -278,26 +304,25 @@ Choices.prototype.filter = function() {
   return this.items.filter.apply(this.items, arguments);
 };
 
-Choices.prototype.push = function() {
-  var choices = utils.flatten([].slice.call(arguments));
-  var len = choices.length;
-  var idx = -1;
-
-  while (++idx < len) {
-    var choice = choices[idx];
-    this.items.push(new Choice(choice));
-    if (choice.type !== 'separator') {
-      this.realChoices.push(choice);
-    }
-  }
-  return this.items;
-};
-
 /**
  * Getter for getting the length of the collection.
  * @name .length
  * @api public
  */
+
+Object.defineProperty(Choices.prototype, 'checked', {
+  set: function() {
+    throw new Error('.checked is a getter and cannot be defined');
+  },
+  get: function() {
+    return this.items.reduce(function(acc, choice) {
+      if (choice.checked === true) {
+        acc.push(choice.value);
+      }
+      return acc;
+    }, []);
+  }
+});
 
 Object.defineProperty(Choices.prototype, 'length', {
   set: function() {
@@ -308,41 +333,14 @@ Object.defineProperty(Choices.prototype, 'length', {
   }
 });
 
-/**
- * Getter for getting all non-separator choices from the collection.
- * @name .realChoices
- * @api public
- */
-
-Object.defineProperty(Choices.prototype, 'realChoices', {
-  set: function() {
-    throw new Error('.realChoices is a getter and cannot be defined');
+Object.defineProperty(Choices.prototype, 'move', {
+  set: function(move) {
+    utils.define(this, '_move', move);
   },
   get: function() {
-    var choices = [];
-    var idx = -1;
-    while (++idx < this.length) {
-      var choice = this.items[idx];
-      if (choice.type !== 'separator' && !choice.disabled) {
-        choices.push(choice);
-      }
-    }
-    return choices;
-  }
-});
-
-/**
- * Getter for getting the length of the collection excluding non-separator choices.
- * @name .realLength
- * @api public
- */
-
-Object.defineProperty(Choices.prototype, 'realLength', {
-  set: function() {
-    throw new Error('.realLength is a getter and cannot be defined');
-  },
-  get: function() {
-    return this.realChoices.length;
+    if (this._move) return this._move;
+    utils.define(this, '_move', new Move(this, this.options));
+    return this._move;
   }
 });
 
@@ -357,7 +355,7 @@ Object.defineProperty(Choices.prototype, 'realLength', {
  * @api public
  */
 
-Choices.Separator = Separator;
+Choices.Separator = utils.Separator;
 
 /**
  * Expose `Choices`

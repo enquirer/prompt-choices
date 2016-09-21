@@ -2,6 +2,7 @@
 
 require('mocha');
 var assert = require('assert');
+var Separator = require('choices-separator');
 var utils = require('../lib/utils');
 var Choices = require('..');
 
@@ -37,19 +38,16 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
       assert.deepEqual(choices.items, [
         {
-          disabled: false,
           checked: false,
           name: 'foo',
           value: 'foo',
           short: 'foo'
         }, {
-          disabled: false,
           checked: false,
           name: 'bar',
           value: 'bar',
           short: 'bar'
         }, {
-          disabled: false,
           checked: false,
           name: 'baz',
           value: 'baz',
@@ -81,49 +79,24 @@ describe('prompt-choices', function() {
     });
   });
 
-  describe('.realLength', function() {
-    it('should get the realLength of the choices array', function() {
+  describe('separators', function() {
+    it('should add a separator to choices.choices', function() {
       var fixture = ['foo', new Choices.Separator(), 'bar', 'baz'];
       var choices = new Choices(fixture);
-
-      assert.equal(choices.realLength, 3);
-    });
-
-    it('should throw when realLength is set directly', function() {
-      var fixture = ['foo', 'bar', 'baz'];
-      var choices = new Choices(fixture);
-      var count = 0;
-
-      assert.throws(function() {
-        count++;
-        choices.realLength = 5;
-      }, /realLength/);
-
-      assert.equal(count, 1);
-    });
-  });
-
-  describe('.realChoices', function() {
-    it('should get the realChoices, excluding separators', function() {
-      var fixture = ['foo', new Choices.Separator(), 'bar', 'baz'];
-      var choices = new Choices(fixture);
-
-      assert.deepEqual(choices.realChoices, [
+      assert.deepEqual(choices.choices, [
         {
-          disabled: false,
           checked: false,
           name: 'foo',
           value: 'foo',
           short: 'foo'
         },
+        choices.separator(),
         {
-          disabled: false,
           checked: false,
           name: 'bar',
           value: 'bar',
           short: 'bar'
         }, {
-          disabled: false,
           checked: false,
           name: 'baz',
           value: 'baz',
@@ -132,41 +105,22 @@ describe('prompt-choices', function() {
       ]);
     });
 
-    it('should throw when realChoices is set directly', function() {
-      var fixture = ['foo', 'bar', 'baz'];
-      var choices = new Choices(fixture);
-      var count = 0;
-
-      assert.throws(function() {
-        count++;
-        choices.realChoices = 5;
-      }, /realChoices/);
-
-      assert.equal(count, 1);
-    });
-  });
-
-  describe('separators', function() {
-    it('should add a separator to choices', function() {
+    it('should not add a separator to choices.items', function() {
       var fixture = ['foo', new Choices.Separator(), 'bar', 'baz'];
       var choices = new Choices(fixture);
       assert.deepEqual(choices.items, [
         {
-          disabled: false,
           checked: false,
           name: 'foo',
           value: 'foo',
           short: 'foo'
         },
-        choices.separator(),
         {
-          disabled: false,
           checked: false,
           name: 'bar',
           value: 'bar',
           short: 'bar'
         }, {
-          disabled: false,
           checked: false,
           name: 'baz',
           value: 'baz',
@@ -178,9 +132,8 @@ describe('prompt-choices', function() {
     it('should convert a separator object to a separator instance', function() {
       var fixture = ['foo', {type: 'separator'}, 'bar', 'baz'];
       var choices = new Choices(fixture);
-      assert.deepEqual(choices.items, [
+      assert.deepEqual(choices.choices, [
         {
-          disabled: false,
           checked: false,
           name: 'foo',
           value: 'foo',
@@ -188,13 +141,11 @@ describe('prompt-choices', function() {
         },
         choices.separator(),
         {
-          disabled: false,
           checked: false,
           name: 'bar',
           value: 'bar',
           short: 'bar'
         }, {
-          disabled: false,
           checked: false,
           name: 'baz',
           value: 'baz',
@@ -206,9 +157,8 @@ describe('prompt-choices', function() {
     it('should suport a custom separator string', function() {
       var fixture = ['foo', new Choices.Separator('==='), 'bar', 'baz'];
       var choices = new Choices(fixture);
-      assert.deepEqual(choices.items, [
+      assert.deepEqual(choices.choices, [
         {
-          disabled: false,
           checked: false,
           name: 'foo',
           value: 'foo',
@@ -216,13 +166,11 @@ describe('prompt-choices', function() {
         },
         choices.separator('==='),
         {
-          disabled: false,
           checked: false,
           name: 'bar',
           value: 'bar',
           short: 'bar'
         }, {
-          disabled: false,
           checked: false,
           name: 'baz',
           value: 'baz',
@@ -230,9 +178,8 @@ describe('prompt-choices', function() {
         }
       ]);
 
-      assert.notDeepEqual(choices.items, [
+      assert.notDeepEqual(choices.choices, [
         {
-          disabled: false,
           checked: false,
           name: 'foo',
           value: 'foo',
@@ -240,13 +187,11 @@ describe('prompt-choices', function() {
         },
         choices.separator(),
         {
-          disabled: false,
           checked: false,
           name: 'bar',
           value: 'bar',
           short: 'bar'
         }, {
-          disabled: false,
           checked: false,
           name: 'baz',
           value: 'baz',
@@ -262,21 +207,18 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
       assert.deepEqual(choices.keymap, {
         foo: {
-          disabled: false,
           checked: false,
           name: 'foo',
           value: 'foo',
           short: 'foo'
         },
         bar: {
-          disabled: false,
           checked: false,
           name: 'bar',
           value: 'bar',
           short: 'bar'
         },
         baz: {
-          disabled: false,
           checked: false,
           name: 'baz',
           value: 'baz',
@@ -286,13 +228,12 @@ describe('prompt-choices', function() {
     });
   });
 
-  describe('.toggleChoice', function() {
+  describe('.toggle', function() {
     it('should `toggle` the checked value for the given choice', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
-      choices.toggleChoice(2);
+      choices.toggle(2);
       assert.deepEqual(choices.items[2], {
-        disabled: false,
         checked: true,
         name: 'baz',
         value: 'baz',
@@ -301,13 +242,12 @@ describe('prompt-choices', function() {
     });
   });
 
-  describe('.toggleChoices', function() {
+  describe('.toggle', function() {
     it('should `toggle` the `checked` value of all choices', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
-      choices.toggleChoices(2);
+      choices.toggle(2);
       assert.deepEqual(choices.items[2], {
-        disabled: false,
         checked: true,
         name: 'baz',
         value: 'baz',
@@ -322,7 +262,6 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
       choices.enable(2);
       assert.deepEqual(choices.items[2], {
-        disabled: false,
         checked: true,
         name: 'baz',
         value: 'baz',
@@ -337,7 +276,6 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
       choices.disable(2);
       assert.deepEqual(choices.items[2], {
-        disabled: false,
         checked: false,
         name: 'baz',
         value: 'baz',
@@ -352,7 +290,6 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
 
       assert.deepEqual(choices.get(1), {
-        disabled: false,
         checked: false,
         name: 'bar',
         value: 'bar',
@@ -409,7 +346,6 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
 
       assert.deepEqual(choices.getChoice('foo'), {
-        disabled: false,
         checked: false,
         name: 'foo',
         value: 'foo',
@@ -422,7 +358,6 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
 
       assert.deepEqual(choices.getChoice(2), {
-        disabled: false,
         checked: false,
         name: 'baz',
         value: 'baz',
@@ -437,7 +372,6 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
 
       assert.deepEqual(choices.indexOf('foo'), {
-        disabled: false,
         checked: false,
         name: 'foo',
         value: 'foo',
@@ -467,7 +401,6 @@ describe('prompt-choices', function() {
       });
 
       assert.deepEqual(choices.where('foo'), [{
-        disabled: false,
         checked: false,
         name: 'foo',
         value: 'foo',
@@ -482,7 +415,6 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
 
       assert.deepEqual(choices.where('foo'), [{
-        disabled: false,
         checked: false,
         name: 'foo',
         value: 'foo',
@@ -496,14 +428,12 @@ describe('prompt-choices', function() {
 
       assert.deepEqual(choices.where(/^b/), [
         {
-          disabled: false,
           checked: false,
           name: 'bar',
           value: 'bar',
           short: 'bar'
         },
         {
-          disabled: false,
           checked: false,
           name: 'baz',
           value: 'baz',
@@ -518,7 +448,6 @@ describe('prompt-choices', function() {
 
       assert.deepEqual(choices.where({name: 'bar'}), [
         {
-          disabled: false,
           checked: false,
           name: 'bar',
           value: 'bar',
@@ -535,7 +464,6 @@ describe('prompt-choices', function() {
         return choice.name === 'bar';
       }), [
         {
-          disabled: false,
           checked: false,
           name: 'bar',
           value: 'bar',

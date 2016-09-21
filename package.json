@@ -11,9 +11,7 @@
   "license": "MIT",
   "files": [
     "index.js",
-    "lib",
-    "LICENSE",
-    "README.md"
+    "lib"
   ],
   "main": "index.js",
   "engines": {
@@ -24,19 +22,25 @@
   },
   "dependencies": {
     "arr-flatten": "^1.0.1",
-    "choices-separator": "^0.1.0",
+    "choices-separator": "^0.1.2",
+    "clone-deep": "^0.2.4",
+    "debug": "^2.2.0",
     "define-property": "^0.2.5",
     "extend-shallow": "^2.0.1",
-    "is-number": "^2.1.0",
+    "is-number": "^3.0.0",
     "isobject": "^2.1.0",
     "lazy-cache": "^2.0.1",
+    "log-utils": "^0.2.1",
+    "radio-symbol": "^0.2.1",
+    "set-value": "^0.4.0",
+    "terminal-paginator": "^0.2.0",
     "toggle-array": "^0.1.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-eslint": "^3.0.1",
     "gulp-format-md": "^0.1.10",
-    "gulp-istanbul": "^1.1.0",
+    "gulp-istanbul": "^1.1.1",
     "gulp-mocha": "^3.0.1",
     "gulp-unused": "^0.2.0",
     "mocha": "^3.0.2"
