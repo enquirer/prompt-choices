@@ -161,13 +161,10 @@ Choices.prototype.getChoice = function(idx) {
  */
 
 Choices.prototype.getIndex = function(key) {
-  if (utils.isNumber(key) && key !== -1 && key < this.items.length) {
-    return key;
-  }
   if (typeof key === 'string') {
     return this.pluck('value').indexOf(key);
   }
-  return -1;
+  return this.isValidIndex(key) ? key : -1;
 };
 
 /**
@@ -199,6 +196,9 @@ Choices.prototype.get = function(idx) {
  */
 
 Choices.prototype.enable = function(idx) {
+  if (Array.isArray(idx)) {
+    return idx.forEach(this.enable.bind(this));
+  }
   this.getChoice(idx).enable('checked');
   return this;
 };
@@ -214,6 +214,9 @@ Choices.prototype.enable = function(idx) {
  */
 
 Choices.prototype.disable = function(idx) {
+  if (Array.isArray(idx)) {
+    return idx.forEach(this.disable.bind(this));
+  }
   this.getChoice(idx).disable('checked');
   return this;
 };
@@ -234,7 +237,7 @@ Choices.prototype.toggle = function(idx, radio) {
   if (radio) {
     utils.toggleArray(this.items, 'checked', idx);
   } else {
-    this.items[idx].toggle();
+    this.getChoice(idx).toggle();
   }
   return this;
 };
@@ -242,37 +245,72 @@ Choices.prototype.toggle = function(idx, radio) {
 /**
  * Return choices that return truthy based on the given `val`.
  *
- * @param {Object|Function|String} `val`
+ * @param {Object|Function|String|RegExp} `val`
  * @return {Array} Matching choices or empty array
  * @api public
  */
 
 Choices.prototype.where = function(val) {
-  return this.items.filter(function(choice) {
-    if (typeof val === 'function') {
-      return val(choice);
-    }
+  var res = [];
 
-    if (typeof val === 'string') {
+  if (typeof val === 'function') {
+    return this.filter(val);
+  }
+
+  if (typeof val === 'string') {
+    return this.filter(function(choice) {
       return choice.name === val || choice.key === val;
-    }
+    });
+  }
 
-    if (val instanceof RegExp) {
+  if (utils.typeOf(val) === 'regexp') {
+    return this.filter(function(choice) {
       return val.test(choice.name) || val.test(choice.key);
-    }
+    });
+  }
 
-    if (utils.isObject(val)) {
+  if (utils.isObject(val)) {
+    return this.filter(function(choice) {
       for (var key in val) {
         if (!choice.hasOwnProperty(key)) {
           return false;
         }
-        if (val[key] !== choice[key]) {
-          return false;
-        }
+        return val[key] === choice[key];
       }
+    });
+  }
+
+  if (Array.isArray(val)) {
+    var acc = [];
+    for (var i = 0; i < val.length; i++) {
+      acc = acc.concat(this.where.call(this, val[i]));
     }
-    return true;
-  });
+    return acc;
+  }
+
+  return [];
+};
+
+/**
+ * Returns true if the given `index` is a valid choice index.
+ * @param {String} `key` Property name to use for plucking objects.
+ * @return {Array} Plucked objects
+ * @api public
+ */
+
+Choices.prototype.isValidIndex = function(idx) {
+  return utils.isNumber(idx) && idx !== -1 && idx < this.items.length;
+};
+
+/**
+ * Return the `.key` property from the choice at the given index.
+ * @param {String} `key` Property name to use for plucking objects.
+ * @return {Array} Plucked objects
+ * @api public
+ */
+
+Choices.prototype.key = function(key) {
+  return this.getChoice(key).key;
 };
 
 /**

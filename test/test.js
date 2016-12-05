@@ -240,15 +240,40 @@ describe('prompt-choices', function() {
         short: 'baz'
       });
     });
-  });
 
-  describe('.toggle', function() {
     it('should `toggle` the `checked` value of all choices', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
-      choices.toggle(2);
+      choices.toggle(2, true);
+
+      assert.deepEqual(choices.items[1], {
+        checked: false,
+        name: 'bar',
+        value: 'bar',
+        short: 'bar'
+      });
+
       assert.deepEqual(choices.items[2], {
         checked: true,
+        name: 'baz',
+        value: 'baz',
+        short: 'baz'
+      });
+    });
+
+    it('should disable all other choices', function() {
+      var fixture = ['foo', 'bar', 'baz'];
+      var choices = new Choices(fixture);
+      choices.toggle(1);
+      assert.deepEqual(choices.items[1], {
+        checked: true,
+        name: 'bar',
+        value: 'bar',
+        short: 'bar'
+      });
+
+      assert.deepEqual(choices.items[2], {
+        checked: false,
         name: 'baz',
         value: 'baz',
         short: 'baz'
@@ -392,19 +417,19 @@ describe('prompt-choices', function() {
   });
 
   describe('.filter', function() {
-    it('should filter choices', function() {
+    it('should filter choices with the given function', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
 
-      var arr = choices.filter(function(choice, i) {
-        return choice.name === 'foo';
-      });
+      var fn = function(choice, i) {
+        return choice.name === 'bar';
+      };
 
-      assert.deepEqual(choices.where('foo'), [{
+      assert.deepEqual(choices.filter(fn), [{
         checked: false,
-        name: 'foo',
-        value: 'foo',
-        short: 'foo'
+        name: 'bar',
+        value: 'bar',
+        short: 'bar'
       }]);
     });
   });
@@ -442,6 +467,24 @@ describe('prompt-choices', function() {
       ]);
     });
 
+    it('should get the choices that match the given function', function() {
+      var fixture = ['foo', 'bar', 'baz'];
+      var choices = new Choices(fixture);
+
+      var fn = function(choice) {
+        return choice.name === 'bar';
+      };
+
+      assert.deepEqual(choices.where(fn), [
+        {
+          checked: false,
+          name: 'bar',
+          value: 'bar',
+          short: 'bar'
+        }
+      ]);
+    });
+
     it('should get the choices that matches the given object', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
@@ -456,18 +499,72 @@ describe('prompt-choices', function() {
       ]);
     });
 
-    it('should get the choices that matches the given function', function() {
+    it('should get the choices that matches elements in an array of objects', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
 
-      assert.deepEqual(choices.where(function(choice) {
-        return choice.name === 'bar';
-      }), [
+      assert.deepEqual(choices.where([{name: 'foo'}, {name: 'bar'}]), [
+        {
+          checked: false,
+          name: 'foo',
+          value: 'foo',
+          short: 'foo'
+        },
         {
           checked: false,
           name: 'bar',
           value: 'bar',
           short: 'bar'
+        }
+      ]);
+    });
+
+    it('should get the choices that matches elements in an array of strings', function() {
+      var fixture = ['foo', 'bar', 'baz'];
+      var choices = new Choices(fixture);
+
+      assert.deepEqual(choices.where(['baz', 'bar']), [
+        {
+          checked: false,
+          name: 'baz',
+          value: 'baz',
+          short: 'baz'
+        },
+        {
+          checked: false,
+          name: 'bar',
+          value: 'bar',
+          short: 'bar'
+        }
+      ]);
+    });
+
+    it('should get the choices that matches elements in an array of mixed values', function() {
+      var fixture = ['foo', 'bar', 'baz'];
+      var choices = new Choices(fixture);
+
+      var fn = function(choice) {
+        return choice.name === 'foo';
+      };
+
+      assert.deepEqual(choices.where([fn, 'bar', {name: 'baz'}]), [
+        {
+          checked: false,
+          name: 'foo',
+          value: 'foo',
+          short: 'foo'
+        },
+        {
+          checked: false,
+          name: 'bar',
+          value: 'bar',
+          short: 'bar'
+        },
+        {
+          checked: false,
+          name: 'baz',
+          value: 'baz',
+          short: 'baz'
         }
       ]);
     });
