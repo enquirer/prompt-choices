@@ -135,7 +135,24 @@ Choices.prototype.separator = function(separator, options) {
  * Get a non-separator choice from the collection.
  *
  * ```js
+ * choices.hasChoice(1);
+ * choices.hasChoice('foo');
+ * ```
+ * @param {Number} `idx` The selected choice index
+ * @return {Object|undefined} Return the matched choice object or undefined
+ * @api public
+ */
+
+Choices.prototype.hasChoice = function(val) {
+  return !!this.getChoice(val);
+};
+
+/**
+ * Get a non-separator choice from the collection.
+ *
+ * ```js
  * choices.getChoice(1);
+ * choices.getChoice('foo');
  * ```
  * @param {Number} `idx` The selected choice index
  * @return {Object|undefined} Return the matched choice object or undefined
