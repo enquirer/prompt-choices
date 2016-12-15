@@ -45,7 +45,7 @@ function Choices(choices, options) {
 Choices.prototype.render = function(position, options) {
   var opts = utils.extend({}, this.options, options);
   var len = this.choices.length;
-  var num = opts.limit || 7;
+  var num = opts.limit;
   var idx = -1;
   var buf = '';
 
@@ -55,7 +55,7 @@ Choices.prototype.render = function(position, options) {
   }
 
   var str = '\n' + buf.replace(/\n$/, '');
-  if (len > num && opts.paginate) {
+  if (opts.paginate && num && len > num) {
     return this.paginator.paginate(str, position, num);
   }
   return str;
@@ -370,9 +370,11 @@ Object.defineProperty(Choices.prototype, 'checked', {
     throw new Error('.checked is a getter and cannot be defined');
   },
   get: function() {
+    var opts = this.options;
     return this.items.reduce(function(acc, choice) {
       if (choice.checked === true) {
-        acc.push(choice.value);
+        // acc.push(opts.choiceObject ? choice : choice.value);
+        acc.push(choice);
       }
       return acc;
     }, []);
