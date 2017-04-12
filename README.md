@@ -1,4 +1,4 @@
-# prompt-choices [![NPM version](https://img.shields.io/npm/v/prompt-choices.svg?style=flat)](https://www.npmjs.com/package/prompt-choices) [![NPM downloads](https://img.shields.io/npm/dm/prompt-choices.svg?style=flat)](https://npmjs.org/package/prompt-choices) [![Build Status](https://img.shields.io/travis/enquirer/prompt-choices.svg?style=flat)](https://travis-ci.org/enquirer/prompt-choices)
+# prompt-choices [![NPM version](https://img.shields.io/npm/v/prompt-choices.svg?style=flat)](https://www.npmjs.com/package/prompt-choices) [![NPM monthly downloads](https://img.shields.io/npm/dm/prompt-choices.svg?style=flat)](https://npmjs.org/package/prompt-choices)  [![NPM total downloads](https://img.shields.io/npm/dt/prompt-choices.svg?style=flat)](https://npmjs.org/package/prompt-choices) [![Linux Build Status](https://img.shields.io/travis/enquirer/prompt-choices.svg?style=flat&label=Travis)](https://travis-ci.org/enquirer/prompt-choices)
 
 > Create an array of multiple choice objects for use in prompts.
 
@@ -34,7 +34,17 @@ var choices = new Choices(['foo', 'bar', 'baz']);
 var choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
 ```
 
-### [.addChoices](index.js#L44)
+### [.render](index.js#L45)
+
+Render the current choices.
+
+**Params**
+
+* `position` **{Number}**: Cursor position
+* `options` **{Object}**
+* `returns` **{String}**
+
+### [.addChoices](index.js#L72)
 
 Add an array of normalized `choice` objects to the `choices` array. This method is called in the constructor, but it can also be used to add choices after instantiation.
 
@@ -48,7 +58,7 @@ Add an array of normalized `choice` objects to the `choices` array. This method 
 choices.addChoices(['a', 'b', 'c']);
 ```
 
-### [.choice](index.js#L77)
+### [.choice](index.js#L111)
 
 Create a new `Choice` object.
 
@@ -63,7 +73,7 @@ Create a new `Choice` object.
 choices.choice('blue');
 ```
 
-### [.separator](index.js#L92)
+### [.separator](index.js#L126)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -78,7 +88,23 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 choices.separator();
 ```
 
-### [.getChoice](index.js#L107)
+### [.hasChoice](index.js#L142)
+
+Get a non-separator choice from the collection.
+
+**Params**
+
+* `idx` **{Number}**: The selected choice index
+* `returns` **{Object|undefined}**: Return the matched choice object or undefined
+
+**Example**
+
+```js
+choices.hasChoice(1);
+choices.hasChoice('foo');
+```
+
+### [.getChoice](index.js#L158)
 
 Get a non-separator choice from the collection.
 
@@ -91,9 +117,10 @@ Get a non-separator choice from the collection.
 
 ```js
 choices.getChoice(1);
+choices.getChoice('foo');
 ```
 
-### [.getIndex](index.js#L127)
+### [.getIndex](index.js#L176)
 
 Get the index of a non-separator choice from the collection.
 
@@ -108,7 +135,7 @@ Get the index of a non-separator choice from the collection.
 choices.getChoice('foo');
 ```
 
-### [.get](index.js#L148)
+### [.get](index.js#L194)
 
 Get the choice or separator object at the specified index.
 
@@ -123,7 +150,7 @@ Get the choice or separator object at the specified index.
 choices.getChoice(1);
 ```
 
-### [.enable](index.js#L165)
+### [.enable](index.js#L211)
 
 Enable the choice at the given `idx`.
 
@@ -137,7 +164,7 @@ Enable the choice at the given `idx`.
 choices.enable(1);
 ```
 
-### [.disable](index.js#L180)
+### [.disable](index.js#L229)
 
 Disable the choice at the given `idx`.
 
@@ -151,21 +178,7 @@ Disable the choice at the given `idx`.
 choices.disable(1);
 ```
 
-### [.toggleChoices](index.js#L195)
-
-Enable the choice at the given `index`, and disable all other choices.
-
-**Params**
-
-* `idx` **{Number}**: The index of the choice to toggle.
-
-**Example**
-
-```js
-choices.toggleChoices(1);
-```
-
-### [.toggleChoice](index.js#L210)
+### [.toggle](index.js#L249)
 
 Toggle the choice at the given `idx`.
 
@@ -176,19 +189,39 @@ Toggle the choice at the given `idx`.
 **Example**
 
 ```js
-choices.toggleChoice(1);
+choices.toggle(1);
+// radio mode
+choices.toggle(1, true);
 ```
 
-### [.where](index.js#L224)
+### [.where](index.js#L266)
 
 Return choices that return truthy based on the given `val`.
 
 **Params**
 
-* `val` **{Object|Function|String}**
+* `val` **{Object|Function|String|RegExp}**
 * `returns` **{Array}**: Matching choices or empty array
 
-### [.pluck](index.js#L259)
+### [.isValidIndex](index.js#L312)
+
+Returns true if the given `index` is a valid choice index.
+
+**Params**
+
+* `key` **{String}**: Property name to use for plucking objects.
+* `returns` **{Array}**: Plucked objects
+
+### [.key](index.js#L323)
+
+Return the `.key` property from the choice at the given index.
+
+**Params**
+
+* `key` **{String}**: Property name to use for plucking objects.
+* `returns` **{Array}**: Plucked objects
+
+### [.pluck](index.js#L334)
 
 Pluck an object with the specified key from the choices collection.
 
@@ -197,19 +230,11 @@ Pluck an object with the specified key from the choices collection.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.length](index.js#L302)
+### [.length](index.js#L362)
 
 Getter for getting the length of the collection.
 
-### [.realChoices](index.js#L317)
-
-Getter for getting all non-separator choices from the collection.
-
-### [.realLength](index.js#L340)
-
-Getter for getting the length of the collection excluding non-separator choices.
-
-### [.Separator](index.js#L360)
+### [.Separator](index.js#L408)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -230,26 +255,32 @@ Code is partially based on the `Choices` class in Inquirer.
 
 ## About
 
+### Related projects
+
+* [enquirer](https://www.npmjs.com/package/enquirer): Intuitive, plugin-based prompt system for node.js. Much faster and lighter alternative to Inquirer, with all… [more](https://github.com/enquirer/enquirer) | [homepage](https://github.com/enquirer/enquirer "Intuitive, plugin-based prompt system for node.js. Much faster and lighter alternative to Inquirer, with all the same prompt types and more, but without the bloat.")
+* [prompt-base](https://www.npmjs.com/package/prompt-base): Base prompt module used for creating custom prompt types for Enquirer. | [homepage](https://github.com/enquirer/prompt-base "Base prompt module used for creating custom prompt types for Enquirer.")
+* [prompt-question](https://www.npmjs.com/package/prompt-question): Question object, used by Enquirer and prompt plugins. | [homepage](https://github.com/enquirer/prompt-question "Question object, used by Enquirer and prompt plugins.")
+
 ### Contributing
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
 
 ### Building docs
 
-_(This document was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme) (a [verb](https://github.com/verbose/verb) generator), please don't edit the readme directly. Any changes to the readme must be made in [.verb.md](.verb.md).)_
+_(This project's readme.md is generated by [verb](https://github.com/verbose/verb-generate-readme), please don't edit the readme directly. Any changes to the readme must be made in the [.verb.md](.verb.md) readme template.)_
 
-To generate the readme and API documentation with [verb](https://github.com/verbose/verb):
+To generate the readme, run the following command:
 
 ```sh
-$ npm install -g verb verb-generate-readme && verb
+$ npm install -g verbose/verb#dev verb-generate-readme && verb
 ```
 
 ### Running tests
 
-Install dev dependencies:
+Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
 
 ```sh
-$ npm install -d && npm test
+$ npm install && npm test
 ```
 
 ### Author
@@ -257,13 +288,13 @@ $ npm install -d && npm test
 **Jon Schlinkert**
 
 * [github/jonschlinkert](https://github.com/jonschlinkert)
-* [twitter/jonschlinkert](http://twitter.com/jonschlinkert)
+* [twitter/jonschlinkert](https://twitter.com/jonschlinkert)
 
 ### License
 
-Copyright © 2016, [Jon Schlinkert](https://github.com/jonschlinkert).
-Released under the [MIT license](https://github.com/enquirer/prompt-choices/blob/master/LICENSE).
+Copyright © 2017, [Jon Schlinkert](https://github.com/jonschlinkert).
+Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.1.30, on August 30, 2016._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.5.0, on April 12, 2017._
