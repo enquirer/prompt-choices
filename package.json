@@ -21,17 +21,17 @@
     "test": "mocha"
   },
   "dependencies": {
-    "arr-flatten": "^1.0.1",
+    "arr-flatten": "^1.0.3",
     "choices-separator": "^0.1.2",
     "clone-deep": "^0.2.4",
-    "debug": "^2.6.3",
-    "define-property": "^0.2.5",
+    "debug": "^2.6.6",
+    "define-property": "^1.0.0",
     "extend-shallow": "^2.0.1",
     "is-number": "^3.0.0",
-    "kind-of": "^3.1.0",
+    "kind-of": "^3.2.0",
     "lazy-cache": "^2.0.2",
     "log-utils": "^0.2.1",
-    "radio-symbol": "^0.2.1",
+    "radio-symbol": "^1.0.1",
     "set-value": "^0.4.3",
     "terminal-paginator": "^0.2.1",
     "toggle-array": "^0.1.0"
@@ -43,7 +43,7 @@
     "gulp-istanbul": "^1.1.1",
     "gulp-mocha": "^3.0.0",
     "gulp-unused": "^0.2.1",
-    "mocha": "^3.2.0"
+    "mocha": "^3.3.0"
   },
   "keywords": [
     "answer",
