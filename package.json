@@ -1,7 +1,7 @@
 {
   "name": "prompt-choices",
   "description": "Create an array of multiple choice objects for use in prompts.",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "homepage": "https://github.com/enquirer/prompt-choices",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "enquirer/prompt-choices",
@@ -89,9 +89,9 @@
       "list": [
         "enquirer",
         "prompt-base",
+        "prompt-radio",
         "prompt-checkbox",
-        "prompt-question",
-        "prompt-radio"
+        "prompt-question"
       ]
     }
   }
