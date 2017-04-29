@@ -310,7 +310,7 @@ describe('prompt-choices', function() {
   });
 
   describe('.get', function() {
-    it('should get a choice', function() {
+    it('should get a choice by index', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
 
@@ -322,15 +322,28 @@ describe('prompt-choices', function() {
       });
     });
 
-    it('should throw an error when choice is not a number', function() {
+    it('should get a choice by key', function() {
+      var fixture = ['foo', 'bar', 'baz'];
+      var choices = new Choices(fixture);
+
+      assert.deepEqual(choices.get('bar'), {
+        checked: false,
+        name: 'bar',
+        value: 'bar',
+        short: 'bar'
+      });
+    });
+
+    it('should throw an error when choice is not valid', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
       var count = 0;
 
       assert.throws(function() {
         count++;
-        choices.get('foo');
+        choices.get({});
       }, /expected/);
+
       assert.equal(count, 1);
     });
   });
@@ -431,6 +444,18 @@ describe('prompt-choices', function() {
         value: 'bar',
         short: 'bar'
       }]);
+    });
+  });
+
+  describe('.pluck', function() {
+    it('should pluck choice content by property name', function () {
+      var choices = new Choices([{name: 'f', key: 'foo'}, {name: 'b', key: 'bar'}]);
+      assert.deepEqual(choices.pluck('name'), ['f', 'b']);
+    });
+
+    it('should pluck choice content by property value', function () {
+      var choices = new Choices([{name: 'f', key: 'foo'}, {name: 'b', key: 'bar'}]);
+      assert.deepEqual(choices.pluck('key'), ['foo', 'bar']);
     });
   });
 

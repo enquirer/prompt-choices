@@ -50,7 +50,7 @@ Choices.prototype.render = function(position, options) {
 
   position = position || 0;
   while (++idx < len) {
-    buf += this.choices[idx].render(position);
+    buf += this.choices[idx].render(position, opts);
   }
 
   var str = '\n' + buf.replace(/\n$/, '');
@@ -113,7 +113,8 @@ Choices.prototype.choice = function(choice) {
 };
 
 /**
- * Create a new `Separator` object. See [choices-separator][] for more details.
+ * Create a new `Separator` object. See [choices-separator][]
+ * for more details.
  *
  * ```js
  * choices.separator();
@@ -128,19 +129,40 @@ Choices.prototype.separator = function(separator, options) {
 };
 
 /**
- * Get a non-separator choice from the collection.
+ * Returns true if a choice exists.
  *
  * ```js
  * choices.hasChoice(1);
  * choices.hasChoice('foo');
  * ```
- * @param {Number} `idx` The selected choice index
- * @return {Object|undefined} Return the matched choice object or undefined
+ * @param {Number} `val` The index or key of the choice to check for.
+ * @return {Boolean}
  * @api public
  */
 
 Choices.prototype.hasChoice = function(val) {
-  return !!this.getChoice(val);
+  return this.getIndex(val) !== -1;
+};
+
+/**
+ * Get the choice or separator object at the specified index.
+ *
+ * ```js
+ * var choice = choices.get(1);
+ * ```
+ * @param {Number} `idx` The index of the object to get
+ * @return {Object} Returns the specified choice
+ * @api public
+ */
+
+Choices.prototype.get = function(idx) {
+  if (typeof idx === 'string') {
+    return this.keymap[idx];
+  }
+  if (!utils.isNumber(idx)) {
+    throw new TypeError('expected index to be a number or string');
+  }
+  return this.items[idx];
 };
 
 /**
@@ -166,7 +188,11 @@ Choices.prototype.getChoice = function(idx) {
  * Get the index of a non-separator choice from the collection.
  *
  * ```js
- * choices.getChoice('foo');
+ * var choices = new Choices(['foo', 'bar', 'baz']);
+ * console.log(choices.getIndex('foo')); //=> 0
+ * console.log(choices.getIndex('baz')); //=> 2
+ * console.log(choices.getIndex('bar')); //=> 1
+ * console.log(choices.getIndex('qux')); //=> -1
  * ```
  * @param {String} `key` The key of the choice to get
  * @return {Number} Index of the choice or `-1`;
@@ -175,27 +201,9 @@ Choices.prototype.getChoice = function(idx) {
 
 Choices.prototype.getIndex = function(key) {
   if (typeof key === 'string') {
-    return this.pluck('value').indexOf(key);
+    return this.items.indexOf(this.keymap[key]);
   }
   return this.isValidIndex(key) ? key : -1;
-};
-
-/**
- * Get the choice or separator object at the specified index.
- *
- * ```js
- * choices.getChoice(1);
- * ```
- * @param {Number} `idx` The index of the object to get
- * @return {Object} Returns the specified choice
- * @api public
- */
-
-Choices.prototype.get = function(idx) {
-  if (!utils.isNumber(idx)) {
-    throw new TypeError('expected index to be a number');
-  }
-  return this.items[idx];
 };
 
 /**
@@ -247,6 +255,9 @@ Choices.prototype.disable = function(idx) {
  */
 
 Choices.prototype.toggle = function(idx, radio) {
+  if (typeof idx === 'string') {
+    idx = this.getIndex(idx);
+  }
   if (radio) {
     utils.toggleArray(this.items, 'checked', idx);
   } else {
@@ -256,7 +267,8 @@ Choices.prototype.toggle = function(idx, radio) {
 };
 
 /**
- * Return choices that return truthy based on the given `val`.
+ * Return choice values for choices that return truthy based
+ * on the given `val`.
  *
  * @param {Object|Function|String|RegExp} `val`
  * @return {Array} Matching choices or empty array

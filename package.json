@@ -33,6 +33,7 @@
     "log-utils": "^0.2.1",
     "radio-symbol": "^1.0.1",
     "set-value": "^0.4.3",
+    "strip-color": "^0.1.0",
     "terminal-paginator": "^0.2.1",
     "toggle-array": "^0.1.0"
   },
