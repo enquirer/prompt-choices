@@ -15,7 +15,7 @@
   ],
   "main": "index.js",
   "engines": {
-    "node": ">=4.0"
+    "node": ">=0.10.0"
   },
   "scripts": {
     "test": "mocha"
@@ -89,12 +89,10 @@
       "list": [
         "enquirer",
         "prompt-base",
-        "prompt-question"
+        "prompt-checkbox",
+        "prompt-question",
+        "prompt-radio"
       ]
-    },
-    "reflinks": [
-      "verb",
-      "verb-generate-readme"
-    ]
+    }
   }
 }

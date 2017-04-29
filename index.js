@@ -354,8 +354,8 @@ Choices.prototype.filter = function() {
 };
 
 /**
- * Getter for getting the length of the collection.
- * @name .length
+ * Getter for getting the checked choices from the collection.
+ * @name .checked
  * @api public
  */
 
@@ -374,6 +374,12 @@ Object.defineProperty(Choices.prototype, 'checked', {
   }
 });
 
+/**
+ * Getter for getting the length of the collection.
+ * @name .length
+ * @api public
+ */
+
 Object.defineProperty(Choices.prototype, 'length', {
   set: function() {
     throw new Error('.length is a getter and cannot be defined');
@@ -383,13 +389,18 @@ Object.defineProperty(Choices.prototype, 'length', {
   }
 });
 
+/**
+ * Getter for instantiating the `Move` utility class
+ */
+
 Object.defineProperty(Choices.prototype, 'move', {
   set: function(move) {
     utils.define(this, '_move', move);
   },
   get: function() {
-    if (this._move) return this._move;
-    utils.define(this, '_move', new Move(this, this.options));
+    if (!this._move) {
+      utils.define(this, '_move', new Move(this, this.options));
+    }
     return this._move;
   }
 });
