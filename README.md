@@ -79,7 +79,7 @@ Create a new `Choice` object.
 choices.choice('blue');
 ```
 
-### [.separator](index.js#L126)
+### [.separator](index.js#L127)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -94,14 +94,14 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 choices.separator();
 ```
 
-### [.hasChoice](index.js#L142)
+### [.hasChoice](index.js#L143)
 
-Get a non-separator choice from the collection.
+Returns true if a choice exists.
 
 **Params**
 
-* `idx` **{Number}**: The selected choice index
-* `returns` **{Object|undefined}**: Return the matched choice object or undefined
+* `val` **{Number}**: The index or key of the choice to check for.
+* `returns` **{Boolean}**
 
 **Example**
 
@@ -110,38 +110,7 @@ choices.hasChoice(1);
 choices.hasChoice('foo');
 ```
 
-### [.getChoice](index.js#L158)
-
-Get a non-separator choice from the collection.
-
-**Params**
-
-* `idx` **{Number}**: The selected choice index
-* `returns` **{Object|undefined}**: Return the matched choice object or undefined
-
-**Example**
-
-```js
-choices.getChoice(1);
-choices.getChoice('foo');
-```
-
-### [.getIndex](index.js#L176)
-
-Get the index of a non-separator choice from the collection.
-
-**Params**
-
-* `key` **{String}**: The key of the choice to get
-* `returns` **{Number}**: Index of the choice or `-1`;
-
-**Example**
-
-```js
-choices.getChoice('foo');
-```
-
-### [.get](index.js#L194)
+### [.get](index.js#L158)
 
 Get the choice or separator object at the specified index.
 
@@ -153,10 +122,45 @@ Get the choice or separator object at the specified index.
 **Example**
 
 ```js
-choices.getChoice(1);
+var choice = choices.get(1);
 ```
 
-### [.enable](index.js#L211)
+### [.getChoice](index.js#L180)
+
+Get a non-separator choice from the collection.
+
+**Params**
+
+* `idx` **{Number}**: The selected choice index
+* `returns` **{Object|undefined}**: Return the matched choice object or undefined
+
+**Example**
+
+```js
+choices.getChoice(1);
+choices.getChoice('foo');
+```
+
+### [.getIndex](index.js#L202)
+
+Get the index of a non-separator choice from the collection.
+
+**Params**
+
+* `key` **{String}**: The key of the choice to get
+* `returns` **{Number}**: Index of the choice or `-1`;
+
+**Example**
+
+```js
+var choices = new Choices(['foo', 'bar', 'baz']);
+console.log(choices.getIndex('foo')); //=> 0
+console.log(choices.getIndex('baz')); //=> 2
+console.log(choices.getIndex('bar')); //=> 1
+console.log(choices.getIndex('qux')); //=> -1
+```
+
+### [.enable](index.js#L219)
 
 Enable the choice at the given `idx`.
 
@@ -170,7 +174,7 @@ Enable the choice at the given `idx`.
 choices.enable(1);
 ```
 
-### [.disable](index.js#L229)
+### [.disable](index.js#L237)
 
 Disable the choice at the given `idx`.
 
@@ -184,7 +188,7 @@ Disable the choice at the given `idx`.
 choices.disable(1);
 ```
 
-### [.toggle](index.js#L249)
+### [.toggle](index.js#L257)
 
 Toggle the choice at the given `idx`.
 
@@ -200,16 +204,17 @@ choices.toggle(1);
 choices.toggle(1, true);
 ```
 
-### [.where](index.js#L266)
+### [.where](index.js#L278)
 
-Return choices that return truthy based on the given `val`.
+Return choice values for choices that return truthy based
+on the given `val`.
 
 **Params**
 
 * `val` **{Object|Function|String|RegExp}**
 * `returns` **{Array}**: Matching choices or empty array
 
-### [.isValidIndex](index.js#L312)
+### [.isValidIndex](index.js#L324)
 
 Returns true if the given `index` is a valid choice index.
 
@@ -218,7 +223,7 @@ Returns true if the given `index` is a valid choice index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.key](index.js#L323)
+### [.key](index.js#L335)
 
 Return the `.key` property from the choice at the given index.
 
@@ -227,7 +232,7 @@ Return the `.key` property from the choice at the given index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.pluck](index.js#L334)
+### [.pluck](index.js#L346)
 
 Pluck an object with the specified key from the choices collection.
 
@@ -236,15 +241,15 @@ Pluck an object with the specified key from the choices collection.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.checked](index.js#L362)
+### [.checked](index.js#L374)
 
 Getter for getting the checked choices from the collection.
 
-### [.length](index.js#L383)
+### [.length](index.js#L395)
 
 Getter for getting the length of the collection.
 
-### [.Separator](index.js#L419)
+### [.Separator](index.js#L431)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
