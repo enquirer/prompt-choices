@@ -10,12 +10,6 @@ Install with [npm](https://www.npmjs.com/):
 $ npm install --save prompt-choices
 ```
 
-Install with [yarn](https://yarnpkg.com):
-
-```sh
-$ yarn add prompt-choices
-```
-
 ## Usage
 
 ```js
@@ -25,7 +19,7 @@ var choices = new Choices(['foo', 'bar', 'baz']);
 
 ## API
 
-### [Choices](index.js#L19)
+### [Choices](index.js#L22)
 
 Create a new `Choices` collection.
 
@@ -40,7 +34,7 @@ var choices = new Choices(['foo', 'bar', 'baz']);
 var choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
 ```
 
-### [.render](index.js#L45)
+### [.render](index.js#L49)
 
 Render the current choices.
 
@@ -50,7 +44,7 @@ Render the current choices.
 * `options` **{Object}**
 * `returns` **{String}**
 
-### [.addChoices](index.js#L72)
+### [.addChoices](index.js#L76)
 
 Add an array of normalized `choice` objects to the `choices` array. This method is called in the constructor, but it can also be used to add choices after instantiation.
 
@@ -64,7 +58,21 @@ Add an array of normalized `choice` objects to the `choices` array. This method 
 choices.addChoices(['a', 'b', 'c']);
 ```
 
-### [.choice](index.js#L111)
+### [.addChoice](index.js#L96)
+
+Add a normalized `choice` object to the `choices` array.
+
+**Params**
+
+* `choice` **{string|Object}**: One or more choices to add.
+
+**Example**
+
+```js
+choices.addChoice(['a', 'b', 'c']);
+```
+
+### [.choice](index.js#L128)
 
 Create a new `Choice` object.
 
@@ -79,7 +87,7 @@ Create a new `Choice` object.
 choices.choice('blue');
 ```
 
-### [.separator](index.js#L127)
+### [.separator](index.js#L144)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -94,7 +102,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 choices.separator();
 ```
 
-### [.hasChoice](index.js#L143)
+### [.hasChoice](index.js#L160)
 
 Returns true if a choice exists.
 
@@ -110,13 +118,13 @@ choices.hasChoice(1);
 choices.hasChoice('foo');
 ```
 
-### [.get](index.js#L158)
+### [.get](index.js#L175)
 
 Get the choice or separator object at the specified index.
 
 **Params**
 
-* `idx` **{Number}**: The index of the object to get
+* `key` **{Number|String}**: The name or index of the object to get
 * `returns` **{Object}**: Returns the specified choice
 
 **Example**
@@ -125,7 +133,7 @@ Get the choice or separator object at the specified index.
 var choice = choices.get(1);
 ```
 
-### [.getChoice](index.js#L180)
+### [.getChoice](index.js#L197)
 
 Get a non-separator choice from the collection.
 
@@ -141,7 +149,7 @@ choices.getChoice(1);
 choices.getChoice('foo');
 ```
 
-### [.getIndex](index.js#L202)
+### [.getIndex](index.js#L219)
 
 Get the index of a non-separator choice from the collection.
 
@@ -160,21 +168,36 @@ console.log(choices.getIndex('bar')); //=> 1
 console.log(choices.getIndex('qux')); //=> -1
 ```
 
-### [.enable](index.js#L219)
+### [.action](index.js#L237)
 
-Enable the choice at the given `idx`.
+Call the given `method` on `choices.actions`
 
 **Params**
 
-* `idx` **{Number}**: The index of the choice to enable.
+* `method` **{String}**
+* `pos` **{Number}**
 
 **Example**
 
 ```js
-choices.enable(1);
+choices.action('up', 1);
 ```
 
-### [.disable](index.js#L237)
+### [.check](index.js#L255)
+
+Check the choice at the given `idx`.
+
+**Params**
+
+* `val` **{Number|Array}**: The key(s) or index(s) of the choice(s) to check.
+
+**Example**
+
+```js
+choices.check(1);
+```
+
+### [.uncheck](index.js#L280)
 
 Disable the choice at the given `idx`.
 
@@ -185,10 +208,10 @@ Disable the choice at the given `idx`.
 **Example**
 
 ```js
-choices.disable(1);
+choices.uncheck(1);
 ```
 
-### [.toggle](index.js#L257)
+### [.toggle](index.js#L307)
 
 Toggle the choice at the given `idx`.
 
@@ -204,7 +227,7 @@ choices.toggle(1);
 choices.toggle(1, true);
 ```
 
-### [.where](index.js#L278)
+### [.where](index.js#L335)
 
 Return choice values for choices that return truthy based
 on the given `val`.
@@ -214,7 +237,7 @@ on the given `val`.
 * `val` **{Object|Function|String|RegExp}**
 * `returns` **{Array}**: Matching choices or empty array
 
-### [.isValidIndex](index.js#L324)
+### [.isValidIndex](index.js#L381)
 
 Returns true if the given `index` is a valid choice index.
 
@@ -223,7 +246,7 @@ Returns true if the given `index` is a valid choice index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.key](index.js#L335)
+### [.key](index.js#L392)
 
 Return the `.key` property from the choice at the given index.
 
@@ -232,7 +255,7 @@ Return the `.key` property from the choice at the given index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.pluck](index.js#L346)
+### [.pluck](index.js#L403)
 
 Pluck an object with the specified key from the choices collection.
 
@@ -241,15 +264,15 @@ Pluck an object with the specified key from the choices collection.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.checked](index.js#L374)
+### [.checked](index.js#L431)
 
 Getter for getting the checked choices from the collection.
 
-### [.length](index.js#L395)
+### [.length](index.js#L455)
 
 Getter for getting the length of the collection.
 
-### [.Separator](index.js#L431)
+### [.Separator](index.js#L491)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -264,9 +287,66 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 new Choices.Separator();
 ```
 
+### [.isChoices](index.js#L507)
+
+Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
+
+**Params**
+
+* `separator` **{String}**: Optionally pass a string to use as the separator.
+* `returns` **{Object}**: Returns a separator object.
+
+**Example**
+
+```js
+var Choices = require('prompt-choices');
+var choices = new Choices(['foo']);
+console.log(Choices.isChoices(choices)); //=> true
+console.log(Choices.isChoices({})); //=> false
+```
+
+### [.isChoice](index.js#L526)
+
+Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
+
+**Params**
+
+* `separator` **{String}**: Optionally pass a string to use as the separator.
+* `returns` **{Object}**: Returns a separator object.
+
+**Example**
+
+```js
+var Choices = require('prompt-choices');
+var choices = new Choices(['foo']);
+var foo = choices.getChoice('foo');
+console.log(Choices.isChoice(foo)); //=> true
+console.log(Choices.isChoice({})); //=> false
+```
+
+## Release history
+
+### v2.0.0
+
+**Changed**
+
+* renamed `Move` class to `Actions`
+* renamed `choices.move` property to `choices.actions`
+
+**Removed**
+
+* removed `.enable` and `.disable` prototype methods from both `Choice` and `Choices`. These methods were ambiguous as they blurred the distinction between "enabling" a choice (meaning that it's "checked") versus enabling a property on a choice. If this is confusing, that's why they were removed.
+
+**Added**
+
+* adds `Actions` class (previously named `Move`) for managing actions on choices
+* adds `.addChoice` prototype method, for adding a single choice after instantiation
+* adds `.action` prototype method to `Choices`, which calls a method on the `Actions` class
+* adds `.check` and `.uncheck` prototype methods (previously ambiguously named `.enable` and `.disable`)
+
 ## Attribution
 
-Code is partially based on the `Choices` class in Inquirer.
+Some of the code in this library was initially based on the `Choices` class in Inquirer.
 
 ## About
 
@@ -314,4 +394,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on April 29, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on May 10, 2017._
