@@ -1,9 +1,12 @@
 'use strict';
 
+var Paginator = require('terminal-paginator');
 var debug = require('debug')('prompt-choices');
+var define = require('define-property');
+var visit = require('collection-visit');
+var Actions = require('./lib/actions');
 var Choice = require('./lib/choice');
 var utils = require('./lib/utils');
-var Move = require('./lib/move');
 
 /**
  * Create a new `Choices` collection.
@@ -22,14 +25,15 @@ function Choices(choices, options) {
     return choices;
   }
   this.options = options || {};
-  utils.define(this, 'isChoices', true);
-  utils.define(this, 'answers', this.options.answers || {});
-  this.paginator = new utils.Paginator(this.options);
+  define(this, 'isChoices', true);
+  define(this, 'answers', this.options.answers || {});
   this.original = utils.clone(choices);
+  this.paginator = new Paginator(this.options);
+  this.position = 0;
   this.choices = [];
-  this.keymap = {};
   this.items = [];
   this.keys = [];
+  this.keymap = {};
   this.addChoices(choices);
 }
 
@@ -48,13 +52,13 @@ Choices.prototype.render = function(position, options) {
   var idx = -1;
   var buf = '';
 
-  position = position || 0;
+  this.position = position || 0;
   while (++idx < len) {
-    buf += this.choices[idx].render(position, opts);
+    buf += this.choices[idx].render(this.position, opts);
   }
 
-  var str = '\n' + buf.replace(/\n$/, '');
-  return this.paginator.paginate(str, position, opts.limit);
+  var str = '\n' + buf.replace(/\s+$/, '');
+  return this.paginator.paginate(str, this.position, opts.limit);
 };
 
 /**
@@ -73,28 +77,41 @@ Choices.prototype.addChoices = function(choices) {
   choices = utils.arrayify(choices);
   var len = choices.length;
   var idx = -1;
-  var i = 0;
+
   while (++idx < len) {
-    var choice = choices[idx];
-    if (choice.type === 'separator') {
-      if (!choice.isSeparator) {
-        choice = new utils.Separator(choice.line);
-      }
-
-    } else if (choice.disabled) {
-      choice = this.choice(choice);
-
-    } else {
-      choice = this.choice(choice);
-      choice.index = i;
-      i++;
-      this.keymap[choice.key] = choice;
-      this.keys.push(choice.key);
-      this.items.push(choice);
-    }
-    // push normalized "choice" object onto array
-    this.choices.push(choice);
+    this.addChoice(choices[idx]);
   }
+};
+
+/**
+ * Add a normalized `choice` object to the `choices` array.
+ *
+ * ```js
+ * choices.addChoice(['a', 'b', 'c']);
+ * ```
+ * @param {string|Object} `choice` One or more choices to add.
+ * @api public
+ */
+
+Choices.prototype.addChoice = function(choice) {
+  if (choice.type === 'separator') {
+    if (!choice.isSeparator) {
+      choice = this.separator(choice.line);
+    }
+
+  } else if (choice.disabled) {
+    choice = this.choice(choice);
+
+  } else {
+    choice = this.choice(choice);
+    choice.index = this.items.length;
+    this.keymap[choice.key] = choice;
+    this.keys.push(choice.key);
+    this.items.push(choice);
+  }
+
+  // push normalized "choice" object onto array
+  this.choices.push(choice);
 };
 
 /**
@@ -150,19 +167,19 @@ Choices.prototype.hasChoice = function(val) {
  * ```js
  * var choice = choices.get(1);
  * ```
- * @param {Number} `idx` The index of the object to get
+ * @param {Number|String} `key` The name or index of the object to get
  * @return {Object} Returns the specified choice
  * @api public
  */
 
-Choices.prototype.get = function(idx) {
-  if (typeof idx === 'string') {
-    return this.keymap[idx];
+Choices.prototype.get = function(key) {
+  if (typeof key === 'string') {
+    key = this.getIndex(key);
   }
-  if (!utils.isNumber(idx)) {
+  if (!utils.isNumber(key)) {
     throw new TypeError('expected index to be a number or string');
   }
-  return this.items[idx];
+  return this.getChoice(key);
 };
 
 /**
@@ -207,20 +224,46 @@ Choices.prototype.getIndex = function(key) {
 };
 
 /**
- * Enable the choice at the given `idx`.
+ * Call the given `method` on `choices.actions`
  *
  * ```js
- * choices.enable(1);
+ * choices.action('up', 1);
  * ```
- * @param {Number} `idx` The index of the choice to enable.
+ * @param {String} `method`
+ * @param {Number} `pos`
  * @api public
  */
 
-Choices.prototype.enable = function(idx) {
-  if (Array.isArray(idx)) {
-    return idx.forEach(this.enable.bind(this));
+Choices.prototype.action = function(method, pos) {
+  var action = this.actions[method];
+  if (typeof action !== 'function') {
+    throw new Error('choices.action "' + method + '" does not exist');
   }
-  this.getChoice(idx).enable('checked');
+  return action.call(this.actions, pos);
+};
+
+/**
+ * Check the choice at the given `idx`.
+ *
+ * ```js
+ * choices.check(1);
+ * ```
+ * @param {Number|Array} `val` The key(s) or index(s) of the choice(s) to check.
+ * @api public
+ */
+
+Choices.prototype.check = function(val) {
+  if (typeof val === 'undefined') {
+    val = this.keys;
+  }
+  if (Array.isArray(val)) {
+    visit(this, 'check', val);
+    return this;
+  }
+  var choice = this.get(val);
+  if (choice) {
+    choice.checked = true;
+  }
   return this;
 };
 
@@ -228,17 +271,24 @@ Choices.prototype.enable = function(idx) {
  * Disable the choice at the given `idx`.
  *
  * ```js
- * choices.disable(1);
+ * choices.uncheck(1);
  * ```
  * @param {Number} `idx` The index of the choice to enable.
  * @api public
  */
 
-Choices.prototype.disable = function(idx) {
-  if (Array.isArray(idx)) {
-    return idx.forEach(this.disable.bind(this));
+Choices.prototype.uncheck = function(val) {
+  if (typeof val === 'undefined') {
+    val = this.keys;
   }
-  this.getChoice(idx).disable('checked');
+  if (Array.isArray(val)) {
+    visit(this, 'uncheck', val);
+    return this;
+  }
+  var choice = this.get(val);
+  if (choice) {
+    choice.checked = false;
+  }
   return this;
 };
 
@@ -254,14 +304,21 @@ Choices.prototype.disable = function(idx) {
  * @api public
  */
 
-Choices.prototype.toggle = function(idx, radio) {
-  if (typeof idx === 'string') {
-    idx = this.getIndex(idx);
+Choices.prototype.toggle = function(val, radio) {
+  if (typeof val === 'undefined') {
+    val = this.keys;
+  }
+  if (Array.isArray(val)) {
+    visit(this, 'toggle', val, radio);
+    return this;
+  }
+  if (typeof val === 'string') {
+    val = this.getIndex(val);
   }
   if (radio) {
-    utils.toggleArray(this.items, 'checked', idx);
+    utils.toggle(this.items, 'checked', val);
   } else {
-    this.getChoice(idx).toggle();
+    this.getChoice(val).toggle();
   }
   return this;
 };
@@ -378,6 +435,9 @@ Object.defineProperty(Choices.prototype, 'checked', {
   get: function() {
     var opts = this.options;
     return this.items.reduce(function(acc, choice) {
+      if (opts.radio && choice.name === 'all' || choice.name === 'none') {
+        return acc;
+      }
       if (choice.checked === true) {
         acc.push((opts.radio || opts.choiceObject) ? choice : choice.value);
       }
@@ -402,18 +462,18 @@ Object.defineProperty(Choices.prototype, 'length', {
 });
 
 /**
- * Getter for instantiating the `Move` utility class
+ * Getter for instantiating the `Actions` utility class
  */
 
-Object.defineProperty(Choices.prototype, 'move', {
-  set: function(move) {
-    utils.define(this, '_move', move);
+Object.defineProperty(Choices.prototype, 'actions', {
+  set: function(actions) {
+    utils.define(this, '_actions', actions);
   },
   get: function() {
-    if (!this._move) {
-      utils.define(this, '_move', new Move(this, this.options));
+    if (!this._actions) {
+      utils.define(this, '_actions', new Actions(this, this.options));
     }
-    return this._move;
+    return this._actions;
   }
 });
 
@@ -429,6 +489,43 @@ Object.defineProperty(Choices.prototype, 'move', {
  */
 
 Choices.Separator = utils.Separator;
+
+/**
+ * Create a new `Separator` object. See [choices-separator][] for more details.
+ *
+ * ```js
+ * var Choices = require('prompt-choices');
+ * var choices = new Choices(['foo']);
+ * console.log(Choices.isChoices(choices)); //=> true
+ * console.log(Choices.isChoices({})); //=> false
+ * ```
+ * @param {String} `separator` Optionally pass a string to use as the separator.
+ * @return {Object} Returns a separator object.
+ * @api public
+ */
+
+Choices.isChoices = function(choices) {
+  return utils.isObject(choices) && choices.isChoices;
+};
+
+/**
+ * Create a new `Separator` object. See [choices-separator][] for more details.
+ *
+ * ```js
+ * var Choices = require('prompt-choices');
+ * var choices = new Choices(['foo']);
+ * var foo = choices.getChoice('foo');
+ * console.log(Choices.isChoice(foo)); //=> true
+ * console.log(Choices.isChoice({})); //=> false
+ * ```
+ * @param {String} `separator` Optionally pass a string to use as the separator.
+ * @return {Object} Returns a separator object.
+ * @api public
+ */
+
+Choices.isChoice = function(choice) {
+  return utils.isObject(choice) && choice.isChoice;
+};
 
 /**
  * Expose `Choices`
