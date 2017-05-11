@@ -439,7 +439,7 @@ Object.defineProperty(Choices.prototype, 'checked', {
         return acc;
       }
       if (choice.checked === true) {
-        acc.push((opts.radio || opts.choiceObject) ? choice : choice.value);
+        acc.push((opts.radio || opts.objects) ? choice : choice.value);
       }
       return acc;
     }, []);
