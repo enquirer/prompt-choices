@@ -3,6 +3,7 @@
 var Paginator = require('terminal-paginator');
 var debug = require('debug')('prompt-choices');
 var define = require('define-property');
+var extend = require('extend-shallow');
 var visit = require('collection-visit');
 var Actions = require('./lib/actions');
 var Choice = require('./lib/choice');
@@ -24,42 +25,23 @@ function Choices(choices, options) {
   if (utils.isObject(choices) && choices.isChoices) {
     return choices;
   }
-  this.options = options || {};
+
   define(this, 'isChoices', true);
-  define(this, 'answers', this.options.answers || {});
-  this.original = utils.clone(choices);
+  this.options = extend({}, options);
+  this.answers = this.options.answers || {};
   this.paginator = new Paginator(this.options);
-  this.position = 0;
   this.choices = [];
   this.items = [];
-  this.keys = [];
   this.keymap = {};
-  this.addChoices(choices);
-}
+  this.keys = [];
+  this.original = [];
+  this.position = 0;
 
-/**
- * Render the current choices.
- *
- * @param {Number} `position` Cursor position
- * @param {Object} `options`
- * @return {String}
- * @api public
- */
-
-Choices.prototype.render = function(position, options) {
-  var opts = utils.extend({}, this.options, options);
-  var len = this.choices.length;
-  var idx = -1;
-  var buf = '';
-
-  this.position = position || 0;
-  while (++idx < len) {
-    buf += this.choices[idx].render(this.position, opts);
+  if (choices) {
+    this.original = utils.clone(choices);
+    this.addChoices(choices);
   }
-
-  var str = '\n' + buf.replace(/\s+$/, '');
-  return this.paginator.paginate(str, this.position, opts.limit);
-};
+}
 
 /**
  * Add an array of normalized `choice` objects to the `choices` array. This
@@ -75,11 +57,16 @@ Choices.prototype.render = function(position, options) {
 
 Choices.prototype.addChoices = function(choices) {
   choices = utils.arrayify(choices);
-  var len = choices.length;
-  var idx = -1;
 
-  while (++idx < len) {
-    this.addChoice(choices[idx]);
+  if (this.options.radio === true && choices.length >= 2) {
+    var orig = this.original;
+    var blank = this.separator('');
+    var line = this.separator();
+    choices = [blank, 'all', 'none', line].concat(choices);
+  }
+
+  for (var i = 0; i < choices.length; i++) {
+    this.addChoice(choices[i]);
   }
 };
 
@@ -234,12 +221,12 @@ Choices.prototype.getIndex = function(key) {
  * @api public
  */
 
-Choices.prototype.action = function(method, pos) {
+Choices.prototype.action = function(method, pos, radio) {
   var action = this.actions[method];
   if (typeof action !== 'function') {
     throw new Error('choices.action "' + method + '" does not exist');
   }
-  return action.call(this.actions, pos);
+  return action.call(this.actions, pos, radio);
 };
 
 /**
@@ -292,6 +279,13 @@ Choices.prototype.uncheck = function(val) {
   return this;
 };
 
+Choices.prototype.isChecked = function(val) {
+  var choice = this.get(val);
+  if (choice) {
+    return choice.checked === true;
+  }
+};
+
 /**
  * Toggle the choice at the given `idx`.
  *
@@ -315,12 +309,63 @@ Choices.prototype.toggle = function(val, radio) {
   if (typeof val === 'string') {
     val = this.getIndex(val);
   }
+
   if (radio) {
     utils.toggle(this.items, 'checked', val);
   } else {
-    this.getChoice(val).toggle();
+    var choice = this.get(val);
+    if (choice) {
+      choice.toggle();
+    }
   }
   return this;
+};
+
+/**
+ * When user press `enter` key
+ */
+
+Choices.prototype.radio = function() {
+  if (this.length > 1) {
+    var choice = this.get(this.position);
+    if (choice.name === 'all') {
+      this[choice.checked ? 'uncheck' : 'check']();
+      this.toggle('none');
+
+    } else if (choice.name === 'none') {
+      this.uncheck();
+      this.check(this.position);
+
+    } else {
+      this.uncheck(['all', 'none']);
+      this.toggle(this.position);
+    }
+
+  } else {
+    this.toggle(this.position);
+  }
+};
+
+/**
+ * Render the current choice "line".
+ *
+ * @param {Number} `position` Cursor position
+ * @param {Object} `options`
+ * @return {String}
+ * @api public
+ */
+
+Choices.prototype.render = function(position, options) {
+  var opts = utils.extend({}, this.options, options);
+  var buf = '';
+
+  this.position = position || 0;
+  for (var i = 0; i < this.choices.length; i++) {
+    buf += this.choices[i].render(this.position, opts);
+  }
+
+  var str = '\n' + buf.replace(/\s+$/, '');
+  return this.paginator.paginate(str, this.position, opts.limit);
 };
 
 /**
@@ -435,11 +480,11 @@ Object.defineProperty(Choices.prototype, 'checked', {
   get: function() {
     var opts = this.options;
     return this.items.reduce(function(acc, choice) {
-      if (opts.radio && choice.name === 'all' || choice.name === 'none') {
+      if (opts.radio && (choice.name === 'all' || choice.name === 'none')) {
         return acc;
       }
       if (choice.checked === true) {
-        acc.push((opts.radio || opts.objects) ? choice : choice.value);
+        acc.push(opts.objects ? choice : choice.value);
       }
       return acc;
     }, []);

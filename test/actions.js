@@ -56,7 +56,7 @@ describe('Actions', function() {
     }
   });
 
-  it('should not move the pointer down when on the last choice', function() {
+  it('should start move to zero when on the last choice', function() {
     var fixture = ['foo', 'bar', 'baz'];
     var choices = new Choices(fixture);
     var actions = new Actions(choices);
@@ -68,6 +68,8 @@ describe('Actions', function() {
     }
 
     choices.position = actions.down(1);
+    assert.equal(choices.position, 2);
+
     res = choices.render(choices.position);
 
     if (isWindows()) {
