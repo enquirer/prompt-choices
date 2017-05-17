@@ -4,7 +4,7 @@ require('mocha');
 var assert = require('assert');
 var isWindows = require('is-windows');
 var Separator = require('choices-separator');
-var Actions = require('../lib/actions');
+var Actions = require('prompt-actions');
 var utils = require('../lib/utils');
 var Choices = require('..');
 
@@ -874,14 +874,7 @@ describe('prompt-choices', function() {
     it('should allow .actions to be set', function() {
       var choices = new Choices();
       assert.doesNotThrow(function() {
-        choices.actions = new Actions(choices, choices.options);
-      });
-    });
-
-    it('should throw when invalid args are passed', function() {
-      var choices = new Choices();
-      assert.throws(function() {
-        choices.actions = new Actions();
+        choices.actions = new Actions(choices);
       });
     });
 
@@ -896,7 +889,7 @@ describe('prompt-choices', function() {
         assert.equal(res, '\n\u001b[36m❯\u001b[39m◯ foo\n ◯ bar\n ◯ baz');
       }
 
-      choices.position = choices.action('up', 1);
+      choices.position = actions.up(1);
       res = choices.render(1);
 
       if (isWindows()) {
@@ -909,6 +902,7 @@ describe('prompt-choices', function() {
     it('should move the cursor up one row', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
+      var actions = new Actions(choices);
       var res = choices.render(1);
 
       assert.equal(choices.position, 1);
@@ -918,7 +912,7 @@ describe('prompt-choices', function() {
         assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar\n ◯ baz');
       }
 
-      choices.position = choices.action('up', 1);
+      choices.position = actions.up(1);
       assert.equal(choices.position, 0);
       res = choices.render(choices.position);
 
@@ -932,6 +926,8 @@ describe('prompt-choices', function() {
     it('should move the cursor and select the given number', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
+      var actions = new Actions(choices);
+
       var res = choices.render(1);
 
       assert.equal(choices.position, 1);
@@ -941,10 +937,10 @@ describe('prompt-choices', function() {
         assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar\n ◯ baz');
       }
 
-      choices.position = choices.action('down', 1);
+      choices.position = actions.down(1);
       assert.equal(choices.position, 2);
 
-      choices.position = choices.action('number', 1);
+      choices.position = actions.number(1);
       assert.deepEqual(choices.checked, ['foo']);
 
       res = choices.render(choices.position);
@@ -955,7 +951,7 @@ describe('prompt-choices', function() {
         assert.equal(res, '\n\u001b[36m❯\u001b[39m\u001b[32m◉\u001b[39m foo\n ◯ bar\n ◯ baz');
       }
 
-      choices.position = choices.action('number', 3);
+      choices.position = actions.number(3);
       assert.deepEqual(choices.checked, ['foo', 'baz']);
 
       res = choices.render(choices.position);
@@ -969,7 +965,7 @@ describe('prompt-choices', function() {
     it('should use a custom Actions instance to move the cursor', function() {
       var fixture = ['foo', 'bar'];
       var choices = new Choices(fixture);
-      choices.actions = new Actions(choices, choices.options);
+      var actions = new Actions(choices);
       var res = choices.render(1);
       if (isWindows()) {
         assert.equal(res, '\n ( ) foo\n\u001b[36m❯\u001b[39m( ) bar');
@@ -977,7 +973,7 @@ describe('prompt-choices', function() {
         assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar');
       }
 
-      choices.position = choices.action('up', 1);
+      choices.position = actions.up(1);
       choices.render(2);
 
       if (isWindows()) {

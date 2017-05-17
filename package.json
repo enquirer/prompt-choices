@@ -25,7 +25,6 @@
     "choices-separator": "^1.1.0",
     "clone-deep": "^0.2.4",
     "collection-visit": "^1.0.0",
-    "component-emitter": "^1.2.1",
     "debug": "^2.6.6",
     "define-property": "^1.0.0",
     "extend-shallow": "^2.0.1",

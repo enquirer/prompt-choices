@@ -5,9 +5,9 @@ var debug = require('debug')('prompt-choices');
 var define = require('define-property');
 var extend = require('extend-shallow');
 var visit = require('collection-visit');
-var Actions = require('./lib/actions');
 var Choice = require('./lib/choice');
 var utils = require('./lib/utils');
+var log = require('log-utils');
 
 /**
  * Create a new `Choices` collection.
@@ -44,6 +44,66 @@ function Choices(choices, options) {
 }
 
 /**
+ * Create a new `Choice` object.
+ *
+ * ```js
+ * choices.choice('blue');
+ * ```
+ * @param {String|Object} `choice`
+ * @return {Object} Returns a choice object.
+ * @api public
+ */
+
+Choices.prototype.choice = function(choice) {
+  return new Choice(choice, this.options);
+};
+
+
+/**
+ * Returns a normalized `choice` object.
+ *
+ * @param {[type]} choice
+ * @return {[type]}
+ * @api public
+ */
+
+Choices.prototype.toChoice = function(choice) {
+  if (choice.type === 'separator') {
+    if (!choice.isSeparator) {
+      choice = this.separator(choice.line, this.options);
+    }
+    return choice;
+  }
+
+  choice = this.choice(choice);
+  if (!choice.disabled) {
+    choice.index = this.items.length;
+  }
+  return choice;
+};
+
+/**
+ * Add a normalized `choice` object to the `choices` array.
+ *
+ * ```js
+ * choices.addChoice(['a', 'b', 'c']);
+ * ```
+ * @param {string|Object} `choice` One or more choices to add.
+ * @api public
+ */
+
+Choices.prototype.addChoice = function(choice) {
+  choice = this.toChoice(choice);
+  if (!choice.disabled && choice.type !== 'separator') {
+    this.keymap[choice.key] = choice;
+    this.keys.push(choice.key);
+    this.items.push(choice);
+  }
+  this.choices.push(choice);
+  return this;
+};
+
+/**
  * Add an array of normalized `choice` objects to the `choices` array. This
  * method is called in the constructor, but it can also be used to add
  * choices after instantiation.
@@ -59,7 +119,6 @@ Choices.prototype.addChoices = function(choices) {
   choices = utils.arrayify(choices);
 
   if (this.options.radio === true && choices.length >= 2) {
-    var orig = this.original;
     var blank = this.separator('');
     var line = this.separator();
     choices = [blank, 'all', 'none', line].concat(choices);
@@ -68,37 +127,6 @@ Choices.prototype.addChoices = function(choices) {
   for (var i = 0; i < choices.length; i++) {
     this.addChoice(choices[i]);
   }
-};
-
-/**
- * Add a normalized `choice` object to the `choices` array.
- *
- * ```js
- * choices.addChoice(['a', 'b', 'c']);
- * ```
- * @param {string|Object} `choice` One or more choices to add.
- * @api public
- */
-
-Choices.prototype.addChoice = function(choice) {
-  if (choice.type === 'separator') {
-    if (!choice.isSeparator) {
-      choice = this.separator(choice.line);
-    }
-
-  } else if (choice.disabled) {
-    choice = this.choice(choice);
-
-  } else {
-    choice = this.choice(choice);
-    choice.index = this.items.length;
-    this.keymap[choice.key] = choice;
-    this.keys.push(choice.key);
-    this.items.push(choice);
-  }
-
-  // push normalized "choice" object onto array
-  this.choices.push(choice);
 };
 
 /**
@@ -112,8 +140,26 @@ Choices.prototype.addChoice = function(choice) {
  * @api public
  */
 
-Choices.prototype.choice = function(choice) {
-  return new Choice(choice, this.options);
+Choices.prototype.addGroups = function(choices) {
+  var head = [];
+  var rest = [this.separator(this.options)];
+  var keys = Object.keys(choices);
+
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    var arr = choices[key];
+
+    head.push({name: key, choices: arr});
+
+    var len = arr.length;
+    var idx = -1;
+    while (++idx < len) {
+      var choice = arr[idx];
+      rest.push({name: choice, group: key});
+    }
+  }
+
+  return head.concat(rest);
 };
 
 /**
@@ -145,7 +191,7 @@ Choices.prototype.separator = function(separator, options) {
  */
 
 Choices.prototype.hasChoice = function(val) {
-  return this.getIndex(val) !== -1;
+  return typeof this.get(val) !== 'undefined';
 };
 
 /**
@@ -208,25 +254,6 @@ Choices.prototype.getIndex = function(key) {
     return this.items.indexOf(this.keymap[key]);
   }
   return this.isValidIndex(key) ? key : -1;
-};
-
-/**
- * Call the given `method` on `choices.actions`
- *
- * ```js
- * choices.action('up', 1);
- * ```
- * @param {String} `method`
- * @param {Number} `pos`
- * @api public
- */
-
-Choices.prototype.action = function(method, pos, radio) {
-  var action = this.actions[method];
-  if (typeof action !== 'function') {
-    throw new Error('choices.action "' + method + '" does not exist');
-  }
-  return action.call(this.actions, pos, radio);
 };
 
 /**
@@ -503,22 +530,6 @@ Object.defineProperty(Choices.prototype, 'length', {
   },
   get: function() {
     return this.items.length;
-  }
-});
-
-/**
- * Getter for instantiating the `Actions` utility class
- */
-
-Object.defineProperty(Choices.prototype, 'actions', {
-  set: function(actions) {
-    utils.define(this, '_actions', actions);
-  },
-  get: function() {
-    if (!this._actions) {
-      utils.define(this, '_actions', new Actions(this, this.options));
-    }
-    return this._actions;
   }
 });
 
