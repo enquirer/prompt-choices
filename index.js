@@ -58,12 +58,15 @@ Choices.prototype.choice = function(choice) {
   return new Choice(choice, this.options);
 };
 
-
 /**
  * Returns a normalized `choice` object.
  *
- * @param {[type]} choice
- * @return {[type]}
+ * ```js
+ * choices.toChoice('foo');
+ * choices.toChoice({name: 'foo'});
+ * ```
+ * @param {Object|String} `choice`
+ * @return {Object}
  * @api public
  */
 
@@ -81,7 +84,7 @@ Choices.prototype.toChoice = function(choice) {
  * Add a normalized `choice` object to the `choices` array.
  *
  * ```js
- * choices.addChoice(['a', 'b', 'c']);
+ * choices.addChoice(['foo', 'bar', 'baz']);
  * ```
  * @param {string|Object} `choice` One or more choices to add.
  * @api public
@@ -105,7 +108,7 @@ Choices.prototype.addChoice = function(choice) {
  * choices after instantiation.
  *
  * ```js
- * choices.addChoices(['a', 'b', 'c']);
+ * choices.addChoices(['foo', 'bar', 'baz']);
  * ```
  * @param {Array|Object} `choices` One or more choices to add.
  * @api public
@@ -130,13 +133,17 @@ Choices.prototype.addChoices = function(choices) {
 };
 
 /**
- * Create a new `Choice` object.
+ * Create choice "groups" from the given choices object.
+ * ![choice groups](docs/prompt-groups.gif).
  *
  * ```js
- * choices.choice('blue');
+ * choices.toGroups({
+ *   foo: ['a', 'b', 'c'],
+ *   bar: ['d', 'e', 'f']
+ * });
  * ```
- * @param {String|Object} `choice`
- * @return {Object} Returns a choice object.
+ * @param {Object} `choices` (required) The value of each object must be an array of choices (strings or objects).
+ * @return {Array} Returns an array of normalized choice objects.
  * @api public
  */
 
@@ -189,7 +196,11 @@ Choices.prototype.toGroups = function(choices) {
   var none = {name: 'none', type: 'radio', choices: items};
   var all = {name: 'all', type: 'radio', choices: items};
   if (keys.length === 1 && arr.length <= 2) {
-    return tail;
+    return tail.filter(function(choice) {
+      var isOption = choice.type === 'option';
+      delete choice.type;
+      return isOption;
+    });
   }
 
   if (this.options.radio === true) {
@@ -348,8 +359,24 @@ Choices.prototype.uncheck = function(val) {
   return this;
 };
 
-Choices.prototype.isChecked = function(val) {
-  var choice = this.get(val);
+/**
+ * Returns true if a choice is checked.
+ *
+ * ```js
+ * var choices = new Choices(['foo', 'bar', 'baz']);
+ * console.log(choices.isChecked('foo'));
+ * //=> false
+ * choices.check('foo');
+ * console.log(choices.isChecked('foo'));
+ * //=> true
+ * ```
+ * @param {String|Number} `name` Name or index of the choice.
+ * @return {Boolean}
+ * @api public
+ */
+
+Choices.prototype.isChecked = function(name) {
+  var choice = this.get(name);
   if (choice) {
     return choice.checked === true;
   }
@@ -391,6 +418,7 @@ Choices.prototype.toggle = function(val, radio) {
   if (choice) {
     choice.toggle();
   }
+
   this.update();
   return this;
 };
@@ -401,28 +429,32 @@ Choices.prototype.toggle = function(val, radio) {
 
 Choices.prototype.radio = function() {
   var choice = this.get(this.position);
+  if (!choice) return;
 
   if (choice.type === 'group') {
     choice.toggle();
     this.toggle(choice.keys);
+    this.update();
+    return;
+  }
 
-  } else if (this.length > 1) {
+  if (this.length > 1) {
     if (choice.name === 'all') {
       this[choice.checked ? 'uncheck' : 'check']();
       this.toggle('none');
+      this.update();
+      return;
+    }
 
-    } else if (choice.name === 'none') {
+    if (choice.name === 'none') {
       this.uncheck();
       this.check(this.position);
-
-    } else {
-      this.uncheck(['all', 'none']);
-      choice.toggle();
+      this.update();
+      return;
     }
-  } else {
-    choice.toggle();
   }
 
+  choice.toggle();
   this.update();
 };
 
