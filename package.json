@@ -1,7 +1,7 @@
 {
   "name": "prompt-choices",
   "description": "Create an array of multiple choice objects for use in prompts.",
-  "version": "2.0.1",
+  "version": "2.0.0",
   "homepage": "https://github.com/enquirer/prompt-choices",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "enquirer/prompt-choices",
@@ -22,18 +22,19 @@
   },
   "dependencies": {
     "arr-flatten": "^1.0.3",
-    "choices-separator": "^1.1.0",
-    "clone-deep": "^0.2.4",
+    "choices-separator": "^2.0.0",
+    "clone-deep": "^0.3.0",
     "collection-visit": "^1.0.0",
-    "debug": "^2.6.6",
+    "debug": "^2.6.8",
     "define-property": "^1.0.0",
     "extend-shallow": "^2.0.1",
     "is-number": "^3.0.0",
-    "kind-of": "^3.2.0",
+    "kind-of": "^4.0.0",
     "lazy-cache": "^2.0.2",
     "log-utils": "^0.2.1",
-    "radio-symbol": "^1.0.3",
-    "set-value": "^0.4.3",
+    "prompt-pointer": "^1.0.0",
+    "radio-symbol": "^2.0.0",
+    "set-value": "^1.0.0",
     "strip-color": "^0.1.0",
     "terminal-paginator": "^1.1.0",
     "toggle-array": "^1.0.1"
@@ -43,10 +44,11 @@
     "gulp-eslint": "^3.0.1",
     "gulp-format-md": "^0.1.12",
     "gulp-istanbul": "^1.1.1",
-    "gulp-mocha": "^3.0.0",
+    "gulp-mocha": "^3.0.1",
     "gulp-unused": "^0.2.1",
     "is-windows": "^1.0.1",
-    "mocha": "^3.3.0"
+    "mocha": "^3.4.1",
+    "prompt-actions": "^1.1.1"
   },
   "keywords": [
     "answer",
@@ -96,6 +98,9 @@
         "prompt-question",
         "prompt-radio"
       ]
-    }
+    },
+    "reflinks": [
+      "choices-separator"
+    ]
   }
 }

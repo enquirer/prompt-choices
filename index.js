@@ -3,10 +3,11 @@
 var Paginator = require('terminal-paginator');
 var debug = require('debug')('prompt-choices');
 var define = require('define-property');
+var extend = require('extend-shallow');
 var visit = require('collection-visit');
-var Actions = require('./lib/actions');
 var Choice = require('./lib/choice');
 var utils = require('./lib/utils');
+var log = require('log-utils');
 
 /**
  * Create a new `Choices` collection.
@@ -24,95 +25,23 @@ function Choices(choices, options) {
   if (utils.isObject(choices) && choices.isChoices) {
     return choices;
   }
-  this.options = options || {};
+
   define(this, 'isChoices', true);
-  define(this, 'answers', this.options.answers || {});
-  this.original = utils.clone(choices);
+  this.options = extend({}, options);
+  this.answers = this.options.answers || {};
   this.paginator = new Paginator(this.options);
-  this.position = 0;
   this.choices = [];
   this.items = [];
-  this.keys = [];
   this.keymap = {};
-  this.addChoices(choices);
+  this.keys = [];
+  this.original = [];
+  this.position = 0;
+
+  if (choices) {
+    this.original = utils.clone(choices);
+    this.addChoices(choices);
+  }
 }
-
-/**
- * Render the current choices.
- *
- * @param {Number} `position` Cursor position
- * @param {Object} `options`
- * @return {String}
- * @api public
- */
-
-Choices.prototype.render = function(position, options) {
-  var opts = utils.extend({}, this.options, options);
-  var len = this.choices.length;
-  var idx = -1;
-  var buf = '';
-
-  this.position = position || 0;
-  while (++idx < len) {
-    buf += this.choices[idx].render(this.position, opts);
-  }
-
-  var str = '\n' + buf.replace(/\s+$/, '');
-  return this.paginator.paginate(str, this.position, opts.limit);
-};
-
-/**
- * Add an array of normalized `choice` objects to the `choices` array. This
- * method is called in the constructor, but it can also be used to add
- * choices after instantiation.
- *
- * ```js
- * choices.addChoices(['a', 'b', 'c']);
- * ```
- * @param {Array|Object} `choices` One or more choices to add.
- * @api public
- */
-
-Choices.prototype.addChoices = function(choices) {
-  choices = utils.arrayify(choices);
-  var len = choices.length;
-  var idx = -1;
-
-  while (++idx < len) {
-    this.addChoice(choices[idx]);
-  }
-};
-
-/**
- * Add a normalized `choice` object to the `choices` array.
- *
- * ```js
- * choices.addChoice(['a', 'b', 'c']);
- * ```
- * @param {string|Object} `choice` One or more choices to add.
- * @api public
- */
-
-Choices.prototype.addChoice = function(choice) {
-  if (choice.type === 'separator') {
-    if (!choice.isSeparator) {
-      choice = this.separator(choice.line);
-    }
-
-  } else if (choice.disabled) {
-    choice = this.choice(choice);
-
-  } else {
-    choice = this.choice(choice);
-    choice.index = this.items.length;
-    this.keymap[choice.key] = choice;
-    this.keys.push(choice.key);
-    this.items.push(choice);
-  }
-
-  // push normalized "choice" object onto array
-  this.choices.push(choice);
-};
 
 /**
  * Create a new `Choice` object.
@@ -127,6 +56,163 @@ Choices.prototype.addChoice = function(choice) {
 
 Choices.prototype.choice = function(choice) {
   return new Choice(choice, this.options);
+};
+
+/**
+ * Returns a normalized `choice` object.
+ *
+ * ```js
+ * choices.toChoice('foo');
+ * choices.toChoice({name: 'foo'});
+ * ```
+ * @param {Object|String} `choice`
+ * @return {Object}
+ * @api public
+ */
+
+Choices.prototype.toChoice = function(choice) {
+  if (choice.type === 'separator') {
+    if (!choice.isSeparator) {
+      choice = this.separator(choice.line, this.options);
+    }
+    return choice;
+  }
+  return this.choice(choice);
+};
+
+/**
+ * Add a normalized `choice` object to the `choices` array.
+ *
+ * ```js
+ * choices.addChoice(['foo', 'bar', 'baz']);
+ * ```
+ * @param {string|Object} `choice` One or more choices to add.
+ * @api public
+ */
+
+Choices.prototype.addChoice = function(choice) {
+  choice = this.toChoice(choice);
+  if (!choice.disabled && choice.type !== 'separator') {
+    choice.index = this.items.length;
+    this.keymap[choice.key] = choice;
+    this.keys.push(choice.key);
+    this.items.push(choice);
+  }
+  this.choices.push(choice);
+  return this;
+};
+
+/**
+ * Add an array of normalized `choice` objects to the `choices` array. This
+ * method is called in the constructor, but it can also be used to add
+ * choices after instantiation.
+ *
+ * ```js
+ * choices.addChoices(['foo', 'bar', 'baz']);
+ * ```
+ * @param {Array|Object} `choices` One or more choices to add.
+ * @api public
+ */
+
+Choices.prototype.addChoices = function(choices) {
+  if (this.options.radio === true && Array.isArray(choices) && choices.length > 2) {
+    choices = { all: choices };
+  }
+
+  if (utils.isObject(choices)) {
+    choices = this.toGroups(choices);
+  }
+
+  if (!Array.isArray(choices)) {
+    return;
+  }
+
+  for (var i = 0; i < choices.length; i++) {
+    this.addChoice(choices[i]);
+  }
+};
+
+/**
+ * Create choice "groups" from the given choices object.
+ * ![choice groups](docs/prompt-groups.gif).
+ *
+ * ```js
+ * choices.toGroups({
+ *   foo: ['a', 'b', 'c'],
+ *   bar: ['d', 'e', 'f']
+ * });
+ * ```
+ * @param {Object} `choices` (required) The value of each object must be an array of choices (strings or objects).
+ * @return {Array} Returns an array of normalized choice objects.
+ * @api public
+ */
+
+Choices.prototype.toGroups = function(choices) {
+  if (!utils.isObject(choices)) {
+    throw new TypeError('expected choices to be an object');
+  }
+
+  var blank = this.separator('');
+  var line = this.separator(this.options);
+  var keys = Object.keys(choices);
+  var head = [];
+  var tail = [line];
+  var items = [];
+
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    var val = choices[key];
+    var arr = (utils.isObject(val) && val.choices) ? val.choices : val;
+
+    if (!Array.isArray(arr)) {
+      throw new TypeError('expected group choices to be an array');
+    }
+
+    var select = this.choice({
+      name: key,
+      type: 'group',
+      choices: [],
+      keys: []
+    });
+
+    if (key !== 'all') {
+      tail.push(select);
+    }
+    var len = arr.length;
+    var idx = -1;
+
+    for (var j = 0; j < arr.length; j++) {
+      var choice = this.choice(arr[j]);
+      choice.type = 'option',
+      choice.group = select;
+      choice.groupName = key;
+      select.choices.push(choice);
+      select.keys.push(choice.name);
+      tail.push(choice);
+      items.push(choice);
+    }
+  }
+
+  var none = {name: 'none', type: 'radio', choices: items};
+  var all = {name: 'all', type: 'radio', choices: items};
+  if (keys.length === 1 && arr.length <= 2) {
+    return tail.filter(function(choice) {
+      var isOption = choice.type === 'option';
+      delete choice.type;
+      return isOption;
+    });
+  }
+
+  if (this.options.radio === true) {
+    head.unshift(none);
+    head.unshift(all);
+
+  } else if (keys.length === 1 && keys[0] === 'all') {
+    head.push(none);
+  }
+
+  head.unshift(blank);
+  return head.concat(tail);
 };
 
 /**
@@ -158,28 +244,7 @@ Choices.prototype.separator = function(separator, options) {
  */
 
 Choices.prototype.hasChoice = function(val) {
-  return this.getIndex(val) !== -1;
-};
-
-/**
- * Get the choice or separator object at the specified index.
- *
- * ```js
- * var choice = choices.get(1);
- * ```
- * @param {Number|String} `key` The name or index of the object to get
- * @return {Object} Returns the specified choice
- * @api public
- */
-
-Choices.prototype.get = function(key) {
-  if (typeof key === 'string') {
-    key = this.getIndex(key);
-  }
-  if (!utils.isNumber(key)) {
-    throw new TypeError('expected index to be a number or string');
-  }
-  return this.getChoice(key);
+  return typeof this.get(val) !== 'undefined';
 };
 
 /**
@@ -224,22 +289,24 @@ Choices.prototype.getIndex = function(key) {
 };
 
 /**
- * Call the given `method` on `choices.actions`
+ * Get the choice or separator object at the specified index.
  *
  * ```js
- * choices.action('up', 1);
+ * var choice = choices.get(1);
  * ```
- * @param {String} `method`
- * @param {Number} `pos`
+ * @param {Number|String} `key` The name or index of the object to get
+ * @return {Object} Returns the specified choice
  * @api public
  */
 
-Choices.prototype.action = function(method, pos) {
-  var action = this.actions[method];
-  if (typeof action !== 'function') {
-    throw new Error('choices.action "' + method + '" does not exist');
+Choices.prototype.get = function(key) {
+  if (typeof key === 'string') {
+    key = this.getIndex(key);
   }
-  return action.call(this.actions, pos);
+  if (!utils.isNumber(key)) {
+    throw new TypeError('expected index to be a number or string');
+  }
+  return this.getChoice(key);
 };
 
 /**
@@ -293,6 +360,29 @@ Choices.prototype.uncheck = function(val) {
 };
 
 /**
+ * Returns true if a choice is checked.
+ *
+ * ```js
+ * var choices = new Choices(['foo', 'bar', 'baz']);
+ * console.log(choices.isChecked('foo'));
+ * //=> false
+ * choices.check('foo');
+ * console.log(choices.isChecked('foo'));
+ * //=> true
+ * ```
+ * @param {String|Number} `name` Name or index of the choice.
+ * @return {Boolean}
+ * @api public
+ */
+
+Choices.prototype.isChecked = function(name) {
+  var choice = this.get(name);
+  if (choice) {
+    return choice.checked === true;
+  }
+};
+
+/**
  * Toggle the choice at the given `idx`.
  *
  * ```js
@@ -308,19 +398,106 @@ Choices.prototype.toggle = function(val, radio) {
   if (typeof val === 'undefined') {
     val = this.keys;
   }
+
   if (Array.isArray(val)) {
     visit(this, 'toggle', val, radio);
     return this;
   }
+
   if (typeof val === 'string') {
     val = this.getIndex(val);
   }
+
   if (radio) {
     utils.toggle(this.items, 'checked', val);
-  } else {
-    this.getChoice(val).toggle();
+    this.update();
+    return this;
   }
+
+  var choice = this.get(val);
+  if (choice) {
+    choice.toggle();
+  }
+
+  this.update();
   return this;
+};
+
+/**
+ * When user press `enter` key
+ */
+
+Choices.prototype.radio = function() {
+  var choice = this.get(this.position);
+  if (!choice) return;
+
+  if (choice.type === 'group') {
+    choice.toggle();
+    this.toggle(choice.keys);
+    this.update();
+    return;
+  }
+
+  if (this.length > 1) {
+    if (choice.name === 'all') {
+      this[choice.checked ? 'uncheck' : 'check']();
+      this.toggle('none');
+      this.update();
+      return;
+    }
+
+    if (choice.name === 'none') {
+      this.uncheck();
+      this.check(this.position);
+      this.update();
+      return;
+    }
+  }
+
+  choice.toggle();
+  this.update();
+};
+
+Choices.prototype.update = function() {
+  if (this.all) {
+    this.check('all');
+    this.uncheck('none');
+    return;
+  }
+  if (this.none) {
+    this.uncheck('all');
+    this.check('none');
+    return;
+  }
+  if (this.checked.length) {
+    this.uncheck(['all', 'none']);
+  }
+};
+
+/**
+ * Render the current choice "line".
+ *
+ * @param {Number} `position` Cursor position
+ * @param {Object} `options`
+ * @return {String}
+ * @api public
+ */
+
+Choices.prototype.render = function(position, options) {
+  var opts = utils.extend({limit: 7}, this.options, options);
+  var buf = '';
+
+  if (opts.radio === true) {
+    opts.limit += 2;
+  }
+
+  this.position = position || 0;
+  for (var i = 0; i < this.choices.length; i++) {
+    buf += this.choices[i].render(this.position, opts);
+  }
+
+  var str = '\n' + buf.replace(/\s+$/, '');
+  return this.paginator.paginate(str, this.position, opts.limit);
 };
 
 /**
@@ -369,6 +546,23 @@ Choices.prototype.where = function(val) {
   }
 
   return [];
+};
+
+/**
+ * Returns true if the given `choice` is a valid choice item, and
+ * not a "group" or "radio" choice.
+ *
+ * @param {String} `key` Property name to use for plucking objects.
+ * @return {Array} Plucked objects
+ * @api public
+ */
+
+Choices.prototype.isItem = function(choice) {
+  return choice.type !== 'separator'
+    && choice.type !== 'group'
+    && choice.type !== 'radio'
+    && choice.name !== 'none'
+    && choice.name !== 'all';
 };
 
 /**
@@ -422,6 +616,10 @@ Choices.prototype.filter = function() {
   return this.items.filter.apply(this.items, arguments);
 };
 
+Choices.prototype.some = function() {
+  return this.items.some.apply(this.items, arguments);
+};
+
 /**
  * Getter for getting the checked choices from the collection.
  * @name .checked
@@ -433,16 +631,34 @@ Object.defineProperty(Choices.prototype, 'checked', {
     throw new Error('.checked is a getter and cannot be defined');
   },
   get: function() {
-    var opts = this.options;
     return this.items.reduce(function(acc, choice) {
-      if (opts.radio && choice.name === 'all' || choice.name === 'none') {
+      if (this.options.radio === true && !this.isItem(choice)) {
         return acc;
       }
       if (choice.checked === true) {
-        acc.push((opts.radio || opts.objects) ? choice : choice.value);
+        acc.push(choice.value);
       }
       return acc;
-    }, []);
+    }.bind(this), []);
+  }
+});
+
+Object.defineProperty(Choices.prototype, 'all', {
+  set: function() {
+    throw new Error('.all is a getter and cannot be defined');
+  },
+  get: function() {
+    var items = this.filter(this.isItem);
+    return items.length === this.checked.length;
+  }
+});
+
+Object.defineProperty(Choices.prototype, 'none', {
+  set: function() {
+    throw new Error('.none is a getter and cannot be defined');
+  },
+  get: function() {
+    return this.checked.length === 0;
   }
 });
 
@@ -458,22 +674,6 @@ Object.defineProperty(Choices.prototype, 'length', {
   },
   get: function() {
     return this.items.length;
-  }
-});
-
-/**
- * Getter for instantiating the `Actions` utility class
- */
-
-Object.defineProperty(Choices.prototype, 'actions', {
-  set: function(actions) {
-    utils.define(this, '_actions', actions);
-  },
-  get: function() {
-    if (!this._actions) {
-      utils.define(this, '_actions', new Actions(this, this.options));
-    }
-    return this._actions;
   }
 });
 

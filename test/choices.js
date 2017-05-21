@@ -4,9 +4,17 @@ require('mocha');
 var assert = require('assert');
 var isWindows = require('is-windows');
 var Separator = require('choices-separator');
-var Actions = require('../lib/actions');
+var Actions = require('prompt-actions');
 var utils = require('../lib/utils');
 var Choices = require('..');
+
+// these are different on each platform
+var radio = require('radio-symbol');
+var pointer = require('prompt-pointer');
+var p = '\u001b[36m' + pointer() + '\u001b[39m';
+var dis = radio.disabled;
+var off = radio.off;
+var on = radio.on;
 
 describe('prompt-choices', function() {
   describe('main export', function() {
@@ -814,22 +822,14 @@ describe('prompt-choices', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
       var res = choices.render(0);
-      if (isWindows()) {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m( ) foo\n ( ) bar\n ( ) baz');
-      } else {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m◯ foo\n ◯ bar\n ◯ baz');
-      }
+      assert.equal(res, '\n' + p + off + ' foo\n ' + off + ' bar\n ' + off + ' baz');
     });
 
     it('should put the cursor next to the specified choice', function() {
       var fixture = ['foo', 'bar'];
       var choices = new Choices(fixture);
       var res = choices.render(1);
-      if (isWindows()) {
-        assert.equal(res, '\n ( ) foo\n\u001b[36m❯\u001b[39m( ) bar');
-      } else {
-        assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar');
-      }
+      assert.equal(res, '\n ' + off + ' foo\n' + p + off + ' bar');
     });
 
     it('should render an enabled choice', function() {
@@ -837,11 +837,7 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
       choices.getChoice(1).toggle();
       var res = choices.render(0);
-      if (isWindows()) {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m( ) foo\n \u001b[32m(*)\u001b[39m bar\n ( ) baz');
-      } else {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m◯ foo\n \u001b[32m◉\u001b[39m bar\n ◯ baz');
-      }
+      assert.equal(res, '\n' + p + off + ' foo\n ' + on + ' bar\n ' + off + ' baz');
     });
 
     it('should render a disabled choice', function() {
@@ -849,11 +845,7 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
       choices.getChoice(1).disabled = true;
       var res = choices.render(0);
-      if (isWindows()) {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m( ) foo\n \u001b[90m(x)\u001b[39m \u001b[2mbar (Disabled)\u001b[22m\n ( ) baz');
-      } else {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m◯ foo\n \u001b[90mⓧ\u001b[39m \u001b[2mbar (Disabled)\u001b[22m\n ◯ baz');
-      }
+      assert.equal(res, '\n' + p + off + ' foo\n ' + dis + ' \u001b[2mbar (Disabled)\u001b[22m\n ' + off + ' baz');
     });
   });
 
@@ -862,11 +854,7 @@ describe('prompt-choices', function() {
       var fixture = ['foo', 'bar', 'baz', 'qux', 'fez', 'faz'];
       var choices = new Choices(fixture);
       var res = choices.render(0, {paginate: true, limit: 4});
-      if (isWindows()) {
-        assert.equal(res, '\n ( ) bar\n ( ) baz\n ( ) qux\n ( ) fez\n\u001b[2m(Move up and down to reveal more choices)\u001b[22m');
-      } else {
-        assert.equal(res, '\n ◯ bar\n ◯ baz\n ◯ qux\n ◯ fez\n\u001b[2m(Move up and down to reveal more choices)\u001b[22m');
-      }
+      assert.equal(res, '\n ' + off + ' bar\n ' + off + ' baz\n ' + off + ' qux\n ' + off + ' fez\n\u001b[2m(Move up and down to reveal more choices)\u001b[22m');
     });
   });
 
@@ -874,14 +862,7 @@ describe('prompt-choices', function() {
     it('should allow .actions to be set', function() {
       var choices = new Choices();
       assert.doesNotThrow(function() {
-        choices.actions = new Actions(choices, choices.options);
-      });
-    });
-
-    it('should throw when invalid args are passed', function() {
-      var choices = new Choices();
-      assert.throws(function() {
-        choices.actions = new Actions();
+        choices.actions = new Actions(choices);
       });
     });
 
@@ -890,101 +871,66 @@ describe('prompt-choices', function() {
       var choices = new Choices(fixture);
       var actions = new Actions(choices);
       var res = choices.render(0);
-      if (isWindows()) {
-        assert.equal(res, '\n\u001b[36m>\u001b[39m( ) foo\n ( ) bar\n ( ) baz');
-      } else {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m◯ foo\n ◯ bar\n ◯ baz');
-      }
 
-      choices.position = choices.action('up', 1);
+      assert.equal(res, '\n' + p + off + ' foo\n ' + off + ' bar\n ' + off + ' baz');
+
+      choices.position = actions.up(1);
       res = choices.render(1);
 
-      if (isWindows()) {
-        assert.equal(res, '\n ( ) foo\n\u001b[36m>\u001b[39m( ) bar\n ( ) baz');
-      } else {
-        assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar\n ◯ baz');
-      }
+      assert.equal(res, '\n ' + off + ' foo\n' + p + off + ' bar\n ' + off + ' baz');
     });
 
     it('should move the cursor up one row', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
+      var actions = new Actions(choices);
       var res = choices.render(1);
 
       assert.equal(choices.position, 1);
-      if (isWindows()) {
-        assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar\n ◯ baz');
-      } else {
-        assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar\n ◯ baz');
-      }
+      assert.equal(res, '\n ' + off + ' foo\n' + p + off + ' bar\n ' + off + ' baz');
 
-      choices.position = choices.action('up', 1);
+      choices.position = actions.up(1);
       assert.equal(choices.position, 0);
       res = choices.render(choices.position);
-
-      if (isWindows()) {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m◯ foo\n ◯ bar\n ◯ baz');
-      } else {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m◯ foo\n ◯ bar\n ◯ baz');
-      }
+      assert.equal(res, '\n' + p + off + ' foo\n ' + off + ' bar\n ' + off + ' baz');
     });
 
     it('should move the cursor and select the given number', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
+      var actions = new Actions(choices);
+
       var res = choices.render(1);
 
       assert.equal(choices.position, 1);
-      if (isWindows()) {
-        assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar\n ◯ baz');
-      } else {
-        assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar\n ◯ baz');
-      }
+      assert.equal(res, '\n ' + off + ' foo\n' + p + off + ' bar\n ' + off + ' baz');
 
-      choices.position = choices.action('down', 1);
+      choices.position = actions.down(1);
       assert.equal(choices.position, 2);
 
-      choices.position = choices.action('number', 1);
+      choices.position = actions.number(1);
       assert.deepEqual(choices.checked, ['foo']);
 
       res = choices.render(choices.position);
+      assert.equal(res, '\n' + p + on + ' foo\n ' + off + ' bar\n ' + off + ' baz');
 
-      if (isWindows()) {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m\u001b[32m◉\u001b[39m foo\n ◯ bar\n ◯ baz');
-      } else {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m\u001b[32m◉\u001b[39m foo\n ◯ bar\n ◯ baz');
-      }
-
-      choices.position = choices.action('number', 3);
+      choices.position = actions.number(3);
       assert.deepEqual(choices.checked, ['foo', 'baz']);
 
       res = choices.render(choices.position);
-      if (isWindows()) {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m\u001b[32m◉\u001b[39m foo\n ◯ bar\n ◯ baz');
-      } else {
-        assert.equal(res, '\n \u001b[32m◉\u001b[39m foo\n ◯ bar\n\u001b[36m❯\u001b[39m\u001b[32m◉\u001b[39m baz');
-      }
+      assert.equal(res, '\n ' + on + ' foo\n ' + off + ' bar\n' + p + on + ' baz');
     });
 
     it('should use a custom Actions instance to move the cursor', function() {
       var fixture = ['foo', 'bar'];
       var choices = new Choices(fixture);
-      choices.actions = new Actions(choices, choices.options);
+      var actions = new Actions(choices);
       var res = choices.render(1);
-      if (isWindows()) {
-        assert.equal(res, '\n ( ) foo\n\u001b[36m❯\u001b[39m( ) bar');
-      } else {
-        assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar');
-      }
+      assert.equal(res, '\n ' + off + ' foo\n' + p + off + ' bar');
 
-      choices.position = choices.action('up', 1);
+      choices.position = actions.up(1);
       choices.render(2);
-
-      if (isWindows()) {
-        assert.equal(res, '\n ( ) foo\n\u001b[36m❯\u001b[39m( ) bar');
-      } else {
-        assert.equal(res, '\n ◯ foo\n\u001b[36m❯\u001b[39m◯ bar');
-      }
+      assert.equal(res, '\n ' + off + ' foo\n' + p + off + ' bar');
     });
   });
 });
