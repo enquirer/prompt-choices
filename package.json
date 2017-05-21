@@ -32,21 +32,21 @@
     "kind-of": "^3.2.0",
     "lazy-cache": "^2.0.2",
     "log-utils": "^0.2.1",
-    "radio-symbol": "^1.0.3",
+    "radio-symbol": "^2.0.0",
     "set-value": "^0.4.3",
     "strip-color": "^0.1.0",
     "terminal-paginator": "^1.1.0",
     "toggle-array": "^1.0.1"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-eslint": "^3.0.1",
-    "gulp-format-md": "^0.1.12",
-    "gulp-istanbul": "^1.1.1",
-    "gulp-mocha": "^3.0.0",
-    "gulp-unused": "^0.2.1",
+    "mocha": "^3.3.0",
     "is-windows": "^1.0.1",
-    "mocha": "^3.3.0"
+    "gulp": "^3.9.1",
+    "gulp-mocha": "^3.0.0",
+    "gulp-istanbul": "^1.1.1",
+    "gulp-eslint": "^3.0.1",
+    "gulp-unused": "^0.2.1",
+    "gulp-format-md": "^0.1.12"
   },
   "keywords": [
     "answer",

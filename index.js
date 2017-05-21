@@ -74,12 +74,7 @@ Choices.prototype.toChoice = function(choice) {
     }
     return choice;
   }
-
-  choice = this.choice(choice);
-  if (!choice.disabled) {
-    choice.index = this.items.length;
-  }
-  return choice;
+  return this.choice(choice);
 };
 
 /**
@@ -95,6 +90,7 @@ Choices.prototype.toChoice = function(choice) {
 Choices.prototype.addChoice = function(choice) {
   choice = this.toChoice(choice);
   if (!choice.disabled && choice.type !== 'separator') {
+    choice.index = this.items.length;
     this.keymap[choice.key] = choice;
     this.keys.push(choice.key);
     this.items.push(choice);
@@ -116,12 +112,16 @@ Choices.prototype.addChoice = function(choice) {
  */
 
 Choices.prototype.addChoices = function(choices) {
-  choices = utils.arrayify(choices);
+  if (this.options.radio === true && Array.isArray(choices) && choices.length > 2) {
+    choices = { all: choices };
+  }
 
-  if (this.options.radio === true && choices.length >= 2) {
-    var blank = this.separator('');
-    var line = this.separator();
-    choices = [blank, 'all', 'none', line].concat(choices);
+  if (utils.isObject(choices)) {
+    choices = this.toGroups(choices);
+  }
+
+  if (!Array.isArray(choices)) {
+    return;
   }
 
   for (var i = 0; i < choices.length; i++) {
@@ -140,26 +140,68 @@ Choices.prototype.addChoices = function(choices) {
  * @api public
  */
 
-Choices.prototype.addGroups = function(choices) {
-  var head = [];
-  var rest = [this.separator(this.options)];
+Choices.prototype.toGroups = function(choices) {
+  if (!utils.isObject(choices)) {
+    throw new TypeError('expected choices to be an object');
+  }
+
+  var blank = this.separator('');
+  var line = this.separator(this.options);
   var keys = Object.keys(choices);
+  var head = [];
+  var tail = [line];
+  var items = [];
 
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
-    var arr = choices[key];
+    var val = choices[key];
+    var arr = (utils.isObject(val) && val.choices) ? val.choices : val;
 
-    head.push({name: key, choices: arr});
+    if (!Array.isArray(arr)) {
+      throw new TypeError('expected group choices to be an array');
+    }
 
+    var select = this.choice({
+      name: key,
+      type: 'group',
+      choices: [],
+      keys: []
+    });
+
+    if (key !== 'all') {
+      tail.push(select);
+    }
     var len = arr.length;
     var idx = -1;
-    while (++idx < len) {
-      var choice = arr[idx];
-      rest.push({name: choice, group: key});
+
+    for (var j = 0; j < arr.length; j++) {
+      var choice = this.choice(arr[j]);
+      choice.type = 'option',
+      choice.group = select;
+      choice.groupName = key;
+      select.choices.push(choice);
+      select.keys.push(choice.name);
+      tail.push(choice);
+      items.push(choice);
     }
   }
 
-  return head.concat(rest);
+  var none = {name: 'none', type: 'radio', choices: items};
+  var all = {name: 'all', type: 'radio', choices: items};
+  if (keys.length === 1 && arr.length <= 2) {
+    return tail;
+  }
+
+  if (this.options.radio === true) {
+    head.unshift(none);
+    head.unshift(all);
+
+  } else if (keys.length === 1 && keys[0] === 'all') {
+    head.push(none);
+  }
+
+  head.unshift(blank);
+  return head.concat(tail);
 };
 
 /**
@@ -192,27 +234,6 @@ Choices.prototype.separator = function(separator, options) {
 
 Choices.prototype.hasChoice = function(val) {
   return typeof this.get(val) !== 'undefined';
-};
-
-/**
- * Get the choice or separator object at the specified index.
- *
- * ```js
- * var choice = choices.get(1);
- * ```
- * @param {Number|String} `key` The name or index of the object to get
- * @return {Object} Returns the specified choice
- * @api public
- */
-
-Choices.prototype.get = function(key) {
-  if (typeof key === 'string') {
-    key = this.getIndex(key);
-  }
-  if (!utils.isNumber(key)) {
-    throw new TypeError('expected index to be a number or string');
-  }
-  return this.getChoice(key);
 };
 
 /**
@@ -254,6 +275,27 @@ Choices.prototype.getIndex = function(key) {
     return this.items.indexOf(this.keymap[key]);
   }
   return this.isValidIndex(key) ? key : -1;
+};
+
+/**
+ * Get the choice or separator object at the specified index.
+ *
+ * ```js
+ * var choice = choices.get(1);
+ * ```
+ * @param {Number|String} `key` The name or index of the object to get
+ * @return {Object} Returns the specified choice
+ * @api public
+ */
+
+Choices.prototype.get = function(key) {
+  if (typeof key === 'string') {
+    key = this.getIndex(key);
+  }
+  if (!utils.isNumber(key)) {
+    throw new TypeError('expected index to be a number or string');
+  }
+  return this.getChoice(key);
 };
 
 /**
@@ -329,22 +371,27 @@ Choices.prototype.toggle = function(val, radio) {
   if (typeof val === 'undefined') {
     val = this.keys;
   }
+
   if (Array.isArray(val)) {
     visit(this, 'toggle', val, radio);
     return this;
   }
+
   if (typeof val === 'string') {
     val = this.getIndex(val);
   }
 
   if (radio) {
     utils.toggle(this.items, 'checked', val);
-  } else {
-    var choice = this.get(val);
-    if (choice) {
-      choice.toggle();
-    }
+    this.update();
+    return this;
   }
+
+  var choice = this.get(val);
+  if (choice) {
+    choice.toggle();
+  }
+  this.update();
   return this;
 };
 
@@ -353,8 +400,13 @@ Choices.prototype.toggle = function(val, radio) {
  */
 
 Choices.prototype.radio = function() {
-  if (this.length > 1) {
-    var choice = this.get(this.position);
+  var choice = this.get(this.position);
+
+  if (choice.type === 'group') {
+    choice.toggle();
+    this.toggle(choice.keys);
+
+  } else if (this.length > 1) {
     if (choice.name === 'all') {
       this[choice.checked ? 'uncheck' : 'check']();
       this.toggle('none');
@@ -365,11 +417,28 @@ Choices.prototype.radio = function() {
 
     } else {
       this.uncheck(['all', 'none']);
-      this.toggle(this.position);
+      choice.toggle();
     }
-
   } else {
-    this.toggle(this.position);
+    choice.toggle();
+  }
+
+  this.update();
+};
+
+Choices.prototype.update = function() {
+  if (this.all) {
+    this.check('all');
+    this.uncheck('none');
+    return;
+  }
+  if (this.none) {
+    this.uncheck('all');
+    this.check('none');
+    return;
+  }
+  if (this.checked.length) {
+    this.uncheck(['all', 'none']);
   }
 };
 
@@ -383,8 +452,12 @@ Choices.prototype.radio = function() {
  */
 
 Choices.prototype.render = function(position, options) {
-  var opts = utils.extend({}, this.options, options);
+  var opts = utils.extend({limit: 7}, this.options, options);
   var buf = '';
+
+  if (opts.radio === true) {
+    opts.limit += 2;
+  }
 
   this.position = position || 0;
   for (var i = 0; i < this.choices.length; i++) {
@@ -444,6 +517,23 @@ Choices.prototype.where = function(val) {
 };
 
 /**
+ * Returns true if the given `choice` is a valid choice item, and
+ * not a "group" or "radio" choice.
+ *
+ * @param {String} `key` Property name to use for plucking objects.
+ * @return {Array} Plucked objects
+ * @api public
+ */
+
+Choices.prototype.isItem = function(choice) {
+  return choice.type !== 'separator'
+    && choice.type !== 'group'
+    && choice.type !== 'radio'
+    && choice.name !== 'none'
+    && choice.name !== 'all';
+};
+
+/**
  * Returns true if the given `index` is a valid choice index.
  * @param {String} `key` Property name to use for plucking objects.
  * @return {Array} Plucked objects
@@ -494,6 +584,10 @@ Choices.prototype.filter = function() {
   return this.items.filter.apply(this.items, arguments);
 };
 
+Choices.prototype.some = function() {
+  return this.items.some.apply(this.items, arguments);
+};
+
 /**
  * Getter for getting the checked choices from the collection.
  * @name .checked
@@ -505,16 +599,34 @@ Object.defineProperty(Choices.prototype, 'checked', {
     throw new Error('.checked is a getter and cannot be defined');
   },
   get: function() {
-    var opts = this.options;
     return this.items.reduce(function(acc, choice) {
-      if (opts.radio && (choice.name === 'all' || choice.name === 'none')) {
+      if (this.options.radio === true && !this.isItem(choice)) {
         return acc;
       }
       if (choice.checked === true) {
-        acc.push(opts.objects ? choice : choice.value);
+        acc.push(choice.value);
       }
       return acc;
-    }, []);
+    }.bind(this), []);
+  }
+});
+
+Object.defineProperty(Choices.prototype, 'all', {
+  set: function() {
+    throw new Error('.all is a getter and cannot be defined');
+  },
+  get: function() {
+    var items = this.filter(this.isItem);
+    return items.length === this.checked.length;
+  }
+});
+
+Object.defineProperty(Choices.prototype, 'none', {
+  set: function() {
+    throw new Error('.none is a getter and cannot be defined');
+  },
+  get: function() {
+    return this.checked.length === 0;
   }
 });
 

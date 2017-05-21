@@ -83,14 +83,14 @@ describe('choice', function() {
   it('should get a disabled choice.line', function() {
     var choice = new Choice({name: 'foo'});
     choice.disabled = true;
-    assert.equal(choice.line, ' \u001b[90mⓧ\u001b[39m \u001b[2mfoo (Disabled)\u001b[22m\n');
+    assert.equal(choice.line, ' \u001b[90mⒾ\u001b[39m \u001b[2mfoo (Disabled)\u001b[22m\n');
   });
 
   it('should get a disabled choice.line with custom message', function() {
     var choice = new Choice({name: 'foo'});
     choice.checked = false;
     choice.disabled = 'N/A';
-    assert.equal(choice.line, ' \u001b[90mⓧ\u001b[39m \u001b[2mfoo (N/A)\u001b[22m\n');
+    assert.equal(choice.line, ' \u001b[90mⒾ\u001b[39m \u001b[2mfoo (N/A)\u001b[22m\n');
   });
 
   it('should call a custom disabled function', function() {
@@ -99,7 +99,7 @@ describe('choice', function() {
     choice.disabled = function() {
       return 'N/A';
     };
-    assert.equal(choice.line, ' \u001b[90mⓧ\u001b[39m \u001b[2mfoo (N/A)\u001b[22m\n');
+    assert.equal(choice.line, ' \u001b[90mⒾ\u001b[39m \u001b[2mfoo (N/A)\u001b[22m\n');
   });
 
   it('should set choice.line', function() {
@@ -164,7 +164,7 @@ describe('choice', function() {
     if (isWindows()) {
 
     } else {
-      assert.equal(choice.render(), ' \u001b[90mⓧ\u001b[39m \u001b[2mfoo (Disabled)\u001b[22m\n');
+      assert.equal(choice.render(), ' \u001b[90mⒾ\u001b[39m \u001b[2mfoo (Disabled)\u001b[22m\n');
     }
   });
 

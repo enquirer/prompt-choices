@@ -850,9 +850,9 @@ describe('prompt-choices', function() {
       choices.getChoice(1).disabled = true;
       var res = choices.render(0);
       if (isWindows()) {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m( ) foo\n \u001b[90m(x)\u001b[39m \u001b[2mbar (Disabled)\u001b[22m\n ( ) baz');
+        assert.equal(res, '\n\u001b[36m❯\u001b[39m( ) foo\n \u001b[90m(|)\u001b[39m \u001b[2mbar (Disabled)\u001b[22m\n ( ) baz');
       } else {
-        assert.equal(res, '\n\u001b[36m❯\u001b[39m◯ foo\n \u001b[90mⓧ\u001b[39m \u001b[2mbar (Disabled)\u001b[22m\n ◯ baz');
+        assert.equal(res, '\n\u001b[36m❯\u001b[39m◯ foo\n \u001b[90mⒾ\u001b[39m \u001b[2mbar (Disabled)\u001b[22m\n ◯ baz');
       }
     });
   });
