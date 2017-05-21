@@ -156,7 +156,7 @@ Choices.prototype.toGroups = function(choices) {
   var line = this.separator(this.options);
   var keys = Object.keys(choices);
   var head = [];
-  var tail = [line];
+  var tail = this.options.radio ? [line] : [];
   var items = [];
 
   for (var i = 0; i < keys.length; i++) {
@@ -282,6 +282,9 @@ Choices.prototype.getChoice = function(idx) {
  */
 
 Choices.prototype.getIndex = function(key) {
+  if (Choices.isChoice(key)) {
+    return this.items.indexOf(key);
+  }
   if (typeof key === 'string') {
     return this.items.indexOf(this.keymap[key]);
   }
@@ -376,6 +379,15 @@ Choices.prototype.uncheck = function(val) {
  */
 
 Choices.prototype.isChecked = function(name) {
+  if (Array.isArray(name)) {
+    for (var i = 0; i < name.length; i++) {
+      if (!this.isChecked(name[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   var choice = this.get(name);
   if (choice) {
     return choice.checked === true;
@@ -404,19 +416,22 @@ Choices.prototype.toggle = function(val, radio) {
     return this;
   }
 
-  if (typeof val === 'string') {
-    val = this.getIndex(val);
-  }
-
-  if (radio) {
-    utils.toggle(this.items, 'checked', val);
-    this.update();
+  var choice = this.get(val);
+  if (!choice) {
     return this;
   }
 
-  var choice = this.get(val);
-  if (choice) {
+  if (radio) {
+    utils.toggle(this.items, 'checked', this.getIndex(choice));
+  } else {
     choice.toggle();
+  }
+
+  if (choice.type === 'group') {
+    choice.checked = this.isChecked(choice.keys);
+  }
+  if (choice.type === 'option') {
+    choice.group.checked = this.isChecked(choice.group.keys);
   }
 
   this.update();
@@ -432,8 +447,19 @@ Choices.prototype.radio = function() {
   if (!choice) return;
 
   if (choice.type === 'group') {
+    if (choice.checked === true) {
+      this.uncheck(choice.keys);
+    } else {
+      this.check(choice.keys);
+    }
     choice.toggle();
-    this.toggle(choice.keys);
+    this.update();
+    return;
+  }
+
+  if (choice.type === 'option') {
+    choice.toggle();
+    choice.group.checked = this.isChecked(choice.group.keys);
     this.update();
     return;
   }
@@ -504,7 +530,7 @@ Choices.prototype.render = function(position, options) {
  * Return choice values for choices that return truthy based
  * on the given `val`.
  *
- * @param {Object|Function|String|RegExp} `val`
+ * @param {Array|Object|Function|String|RegExp} `val`
  * @return {Array} Matching choices or empty array
  * @api public
  */
@@ -618,6 +644,10 @@ Choices.prototype.filter = function() {
 
 Choices.prototype.some = function() {
   return this.items.some.apply(this.items, arguments);
+};
+
+Choices.prototype.every = function() {
+  return this.items.every.apply(this.items, arguments);
 };
 
 /**
