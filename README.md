@@ -177,7 +177,7 @@ console.log(choices.getIndex('bar')); //=> 1
 console.log(choices.getIndex('qux')); //=> -1
 ```
 
-### [.get](index.js#L302)
+### [.get](index.js#L305)
 
 Get the choice or separator object at the specified index.
 
@@ -192,7 +192,7 @@ Get the choice or separator object at the specified index.
 var choice = choices.get(1);
 ```
 
-### [.check](index.js#L322)
+### [.check](index.js#L325)
 
 Check the choice at the given `idx`.
 
@@ -206,7 +206,7 @@ Check the choice at the given `idx`.
 choices.check(1);
 ```
 
-### [.uncheck](index.js#L347)
+### [.uncheck](index.js#L350)
 
 Disable the choice at the given `idx`.
 
@@ -220,7 +220,7 @@ Disable the choice at the given `idx`.
 choices.uncheck(1);
 ```
 
-### [.isChecked](index.js#L378)
+### [.isChecked](index.js#L381)
 
 Returns true if a choice is checked.
 
@@ -240,7 +240,7 @@ console.log(choices.isChecked('foo'));
 //=> true
 ```
 
-### [.toggle](index.js#L397)
+### [.toggle](index.js#L409)
 
 Toggle the choice at the given `idx`.
 
@@ -256,7 +256,7 @@ choices.toggle(1);
 choices.toggle(1, true);
 ```
 
-### [.render](index.js#L486)
+### [.render](index.js#L512)
 
 Render the current choice "line".
 
@@ -266,17 +266,17 @@ Render the current choice "line".
 * `options` **{Object}**
 * `returns` **{String}**
 
-### [.where](index.js#L512)
+### [.where](index.js#L538)
 
 Return choice values for choices that return truthy based
 on the given `val`.
 
 **Params**
 
-* `val` **{Object|Function|String|RegExp}**
+* `val` **{Array|Object|Function|String|RegExp}**
 * `returns` **{Array}**: Matching choices or empty array
 
-### [.isItem](index.js#L560)
+### [.isItem](index.js#L586)
 
 Returns true if the given `choice` is a valid choice item, and
 not a "group" or "radio" choice.
@@ -286,7 +286,7 @@ not a "group" or "radio" choice.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.isValidIndex](index.js#L575)
+### [.isValidIndex](index.js#L601)
 
 Returns true if the given `index` is a valid choice index.
 
@@ -295,7 +295,7 @@ Returns true if the given `index` is a valid choice index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.key](index.js#L586)
+### [.key](index.js#L612)
 
 Return the `.key` property from the choice at the given index.
 
@@ -304,7 +304,7 @@ Return the `.key` property from the choice at the given index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.pluck](index.js#L597)
+### [.pluck](index.js#L623)
 
 Pluck an object with the specified key from the choices collection.
 
@@ -313,15 +313,15 @@ Pluck an object with the specified key from the choices collection.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.checked](index.js#L629)
+### [.checked](index.js#L659)
 
 Getter for getting the checked choices from the collection.
 
-### [.length](index.js#L671)
+### [.length](index.js#L701)
 
 Getter for getting the length of the collection.
 
-### [.Separator](index.js#L691)
+### [.Separator](index.js#L721)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -336,7 +336,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 new Choices.Separator();
 ```
 
-### [.isChoices](index.js#L707)
+### [.isChoices](index.js#L737)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -354,7 +354,7 @@ console.log(Choices.isChoices(choices)); //=> true
 console.log(Choices.isChoices({})); //=> false
 ```
 
-### [.isChoice](index.js#L726)
+### [.isChoice](index.js#L756)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -374,6 +374,22 @@ console.log(Choices.isChoice({})); //=> false
 ```
 
 ## Release history
+
+### v3.0.2
+
+**Added**
+
+* adds array support to `.isChecked`
+
+**Fixed**
+
+* ensures that choice groups are checked/unchecked based on group items
+
+### v3.0.0
+
+**Added**
+
+* adds support for choice "groups"! This allows you to define an object of choice arrays, where each key in the object creates a choice group.
 
 ### v2.0.0
 
