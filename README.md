@@ -19,7 +19,7 @@ var choices = new Choices(['foo', 'bar', 'baz']);
 
 ## API
 
-### [Choices](index.js#L22)
+### [Choices](index.js#L23)
 
 Create a new `Choices` collection.
 
@@ -34,45 +34,7 @@ var choices = new Choices(['foo', 'bar', 'baz']);
 var choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
 ```
 
-### [.render](index.js#L49)
-
-Render the current choices.
-
-**Params**
-
-* `position` **{Number}**: Cursor position
-* `options` **{Object}**
-* `returns` **{String}**
-
-### [.addChoices](index.js#L76)
-
-Add an array of normalized `choice` objects to the `choices` array. This method is called in the constructor, but it can also be used to add choices after instantiation.
-
-**Params**
-
-* `choices` **{Array|Object}**: One or more choices to add.
-
-**Example**
-
-```js
-choices.addChoices(['a', 'b', 'c']);
-```
-
-### [.addChoice](index.js#L96)
-
-Add a normalized `choice` object to the `choices` array.
-
-**Params**
-
-* `choice` **{string|Object}**: One or more choices to add.
-
-**Example**
-
-```js
-choices.addChoice(['a', 'b', 'c']);
-```
-
-### [.choice](index.js#L128)
+### [.choice](index.js#L57)
 
 Create a new `Choice` object.
 
@@ -87,7 +49,69 @@ Create a new `Choice` object.
 choices.choice('blue');
 ```
 
-### [.separator](index.js#L144)
+### [.toChoice](index.js#L73)
+
+Returns a normalized `choice` object.
+
+**Params**
+
+* `choice` **{Object|String}**
+* `returns` **{Object}**
+
+**Example**
+
+```js
+choices.toChoice('foo');
+choices.toChoice({name: 'foo'});
+```
+
+### [.addChoice](index.js#L93)
+
+Add a normalized `choice` object to the `choices` array.
+
+**Params**
+
+* `choice` **{string|Object}**: One or more choices to add.
+
+**Example**
+
+```js
+choices.addChoice(['foo', 'bar', 'baz']);
+```
+
+### [.addChoices](index.js#L117)
+
+Add an array of normalized `choice` objects to the `choices` array. This method is called in the constructor, but it can also be used to add choices after instantiation.
+
+**Params**
+
+* `choices` **{Array|Object}**: One or more choices to add.
+
+**Example**
+
+```js
+choices.addChoices(['foo', 'bar', 'baz']);
+```
+
+### [.toGroups](index.js#L150)
+
+Create choice "groups" from the given choices object. ![choice groups](docs/prompt-groups.gif).
+
+**Params**
+
+* `choices` **{Object}**: (required) The value of each object must be an array of choices (strings or objects).
+* `returns` **{Array}**: Returns an array of normalized choice objects.
+
+**Example**
+
+```js
+choices.toGroups({
+  foo: ['a', 'b', 'c'],
+  bar: ['d', 'e', 'f']
+});
+```
+
+### [.separator](index.js#L230)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -102,7 +126,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 choices.separator();
 ```
 
-### [.hasChoice](index.js#L160)
+### [.hasChoice](index.js#L246)
 
 Returns true if a choice exists.
 
@@ -118,22 +142,7 @@ choices.hasChoice(1);
 choices.hasChoice('foo');
 ```
 
-### [.get](index.js#L175)
-
-Get the choice or separator object at the specified index.
-
-**Params**
-
-* `key` **{Number|String}**: The name or index of the object to get
-* `returns` **{Object}**: Returns the specified choice
-
-**Example**
-
-```js
-var choice = choices.get(1);
-```
-
-### [.getChoice](index.js#L197)
+### [.getChoice](index.js#L262)
 
 Get a non-separator choice from the collection.
 
@@ -149,7 +158,7 @@ choices.getChoice(1);
 choices.getChoice('foo');
 ```
 
-### [.getIndex](index.js#L219)
+### [.getIndex](index.js#L284)
 
 Get the index of a non-separator choice from the collection.
 
@@ -168,22 +177,22 @@ console.log(choices.getIndex('bar')); //=> 1
 console.log(choices.getIndex('qux')); //=> -1
 ```
 
-### [.action](index.js#L237)
+### [.get](index.js#L302)
 
-Call the given `method` on `choices.actions`
+Get the choice or separator object at the specified index.
 
 **Params**
 
-* `method` **{String}**
-* `pos` **{Number}**
+* `key` **{Number|String}**: The name or index of the object to get
+* `returns` **{Object}**: Returns the specified choice
 
 **Example**
 
 ```js
-choices.action('up', 1);
+var choice = choices.get(1);
 ```
 
-### [.check](index.js#L255)
+### [.check](index.js#L322)
 
 Check the choice at the given `idx`.
 
@@ -197,7 +206,7 @@ Check the choice at the given `idx`.
 choices.check(1);
 ```
 
-### [.uncheck](index.js#L280)
+### [.uncheck](index.js#L347)
 
 Disable the choice at the given `idx`.
 
@@ -211,7 +220,27 @@ Disable the choice at the given `idx`.
 choices.uncheck(1);
 ```
 
-### [.toggle](index.js#L307)
+### [.isChecked](index.js#L378)
+
+Returns true if a choice is checked.
+
+**Params**
+
+* `name` **{String|Number}**: Name or index of the choice.
+* `returns` **{Boolean}**
+
+**Example**
+
+```js
+var choices = new Choices(['foo', 'bar', 'baz']);
+console.log(choices.isChecked('foo'));
+//=> false
+choices.check('foo');
+console.log(choices.isChecked('foo'));
+//=> true
+```
+
+### [.toggle](index.js#L397)
 
 Toggle the choice at the given `idx`.
 
@@ -227,7 +256,17 @@ choices.toggle(1);
 choices.toggle(1, true);
 ```
 
-### [.where](index.js#L335)
+### [.render](index.js#L486)
+
+Render the current choice "line".
+
+**Params**
+
+* `position` **{Number}**: Cursor position
+* `options` **{Object}**
+* `returns` **{String}**
+
+### [.where](index.js#L512)
 
 Return choice values for choices that return truthy based
 on the given `val`.
@@ -237,7 +276,17 @@ on the given `val`.
 * `val` **{Object|Function|String|RegExp}**
 * `returns` **{Array}**: Matching choices or empty array
 
-### [.isValidIndex](index.js#L381)
+### [.isItem](index.js#L560)
+
+Returns true if the given `choice` is a valid choice item, and
+not a "group" or "radio" choice.
+
+**Params**
+
+* `key` **{String}**: Property name to use for plucking objects.
+* `returns` **{Array}**: Plucked objects
+
+### [.isValidIndex](index.js#L575)
 
 Returns true if the given `index` is a valid choice index.
 
@@ -246,7 +295,7 @@ Returns true if the given `index` is a valid choice index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.key](index.js#L392)
+### [.key](index.js#L586)
 
 Return the `.key` property from the choice at the given index.
 
@@ -255,7 +304,7 @@ Return the `.key` property from the choice at the given index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.pluck](index.js#L403)
+### [.pluck](index.js#L597)
 
 Pluck an object with the specified key from the choices collection.
 
@@ -264,15 +313,15 @@ Pluck an object with the specified key from the choices collection.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.checked](index.js#L431)
+### [.checked](index.js#L629)
 
 Getter for getting the checked choices from the collection.
 
-### [.length](index.js#L455)
+### [.length](index.js#L671)
 
 Getter for getting the length of the collection.
 
-### [.Separator](index.js#L491)
+### [.Separator](index.js#L691)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -287,7 +336,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 new Choices.Separator();
 ```
 
-### [.isChoices](index.js#L507)
+### [.isChoices](index.js#L707)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -305,7 +354,7 @@ console.log(Choices.isChoices(choices)); //=> true
 console.log(Choices.isChoices({})); //=> false
 ```
 
-### [.isChoice](index.js#L526)
+### [.isChoice](index.js#L726)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -394,4 +443,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on May 11, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on May 21, 2017._
