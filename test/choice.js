@@ -5,6 +5,14 @@ var assert = require('assert');
 var isWindows = require('is-windows');
 var Choice = require('../lib/choice');
 
+// these are different on each platform
+var radio = require('radio-symbol');
+var pointer = require('prompt-pointer');
+var p = '\u001b[36m' + pointer() + '\u001b[39m';
+var dis = radio.disabled;
+var off = radio.off;
+var on = radio.on;
+
 describe('choice', function() {
   it('should export a function', function() {
     assert.equal(typeof Choice, 'function');
@@ -61,11 +69,7 @@ describe('choice', function() {
 
   it('should get choice.pointer', function() {
     var choice = new Choice({name: 'foo'});
-    if (isWindows()) {
-      assert.deepEqual(choice.pointer, '\u001b[36m>\u001b[39m');
-    } else {
-      assert.deepEqual(choice.pointer, '\u001b[36m❯\u001b[39m');
-    }
+    assert.deepEqual(choice.pointer, p);
   });
 
   it('should throw when trying to set choice.symbol', function() {
@@ -77,20 +81,20 @@ describe('choice', function() {
 
   it('should get choice.line', function() {
     var choice = new Choice({name: 'foo'});
-    assert.equal(choice.line, '\u001b[36m❯\u001b[39m◯ foo\n');
+    assert.equal(choice.line, p + off + ' foo\n');
   });
 
   it('should get a disabled choice.line', function() {
     var choice = new Choice({name: 'foo'});
     choice.disabled = true;
-    assert.equal(choice.line, ' \u001b[90mⒾ\u001b[39m \u001b[2mfoo (Disabled)\u001b[22m\n');
+    assert.equal(choice.line, ' ' + dis + ' \u001b[2mfoo (Disabled)\u001b[22m\n');
   });
 
   it('should get a disabled choice.line with custom message', function() {
     var choice = new Choice({name: 'foo'});
     choice.checked = false;
     choice.disabled = 'N/A';
-    assert.equal(choice.line, ' \u001b[90mⒾ\u001b[39m \u001b[2mfoo (N/A)\u001b[22m\n');
+    assert.equal(choice.line, ' ' + dis + ' \u001b[2mfoo (N/A)\u001b[22m\n');
   });
 
   it('should call a custom disabled function', function() {
@@ -99,13 +103,13 @@ describe('choice', function() {
     choice.disabled = function() {
       return 'N/A';
     };
-    assert.equal(choice.line, ' \u001b[90mⒾ\u001b[39m \u001b[2mfoo (N/A)\u001b[22m\n');
+    assert.equal(choice.line, ' ' + dis + ' \u001b[2mfoo (N/A)\u001b[22m\n');
   });
 
   it('should set choice.line', function() {
     var choice = new Choice({name: 'foo'});
     choice.line = 'bar';
-    assert.equal(choice.line, '\u001b[36m❯\u001b[39m◯ bar\n');
+    assert.equal(choice.line, p + off + ' bar\n');
   });
 
   it('should render a choice', function() {
@@ -113,7 +117,7 @@ describe('choice', function() {
     if (isWindows()) {
 
     } else {
-      assert.equal(choice.render(), ' ◯ foo\n');
+      assert.equal(choice.render(), ' ' + off + ' foo\n');
     }
   });
 
@@ -122,18 +126,18 @@ describe('choice', function() {
     if (isWindows()) {
 
     } else {
-      assert.equal(choice.render(0), '\u001b[36m❯\u001b[39m◯ foo\n');
+      assert.equal(choice.render(0), p + off + ' foo\n');
     }
   });
 
   it('should render a custom pointer', function() {
     var choice = new Choice({name: 'foo'}, {pointer: '>'});
-    assert.equal(choice.render(0), '>◯ foo\n');
+    assert.equal(choice.render(0), '>' + off + ' foo\n');
   });
 
   it('should render a custom pointer from render options', function() {
     var choice = new Choice({name: 'foo'});
-    assert.equal(choice.render(0, {pointer: '>'}), '>◯ foo\n');
+    assert.equal(choice.render(0, {pointer: '>'}), '>' + off + ' foo\n');
   });
 
   it('should render a separator', function() {
@@ -149,23 +153,13 @@ describe('choice', function() {
   it('should render a checked choice', function() {
     var choice = new Choice({name: 'foo'});
     choice.checked = true;
-
-    if (isWindows()) {
-
-    } else {
-      assert.equal(choice.render(), ' \u001b[32m◉\u001b[39m foo\n');
-    }
+    assert.equal(choice.render(), ' ' + on + ' foo\n');
   });
 
   it('should render a disabled choice', function() {
     var choice = new Choice({name: 'foo'});
     choice.disabled = true;
-
-    if (isWindows()) {
-
-    } else {
-      assert.equal(choice.render(), ' \u001b[90mⒾ\u001b[39m \u001b[2mfoo (Disabled)\u001b[22m\n');
-    }
+    assert.equal(choice.render(), ' ' + dis + ' \u001b[2mfoo (Disabled)\u001b[22m\n');
   });
 
   it('should format a choice', function() {
@@ -173,11 +167,6 @@ describe('choice', function() {
     choice.options.format = function(str) {
       return str.toUpperCase();
     };
-
-    if (isWindows()) {
-
-    } else {
-      assert.equal(choice.render(), ' ◯ FOO\n');
-    }
+    assert.equal(choice.render(), ' ' + off + ' FOO\n');
   });
 });
