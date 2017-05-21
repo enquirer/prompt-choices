@@ -48,7 +48,7 @@
     "gulp-unused": "^0.2.1",
     "is-windows": "^1.0.1",
     "mocha": "^3.4.1",
-    "prompt-actions": "^1.1.0"
+    "prompt-actions": "^1.1.1"
   },
   "keywords": [
     "answer",
