@@ -518,19 +518,6 @@ describe('prompt-choices', function() {
         short: 'bar'
       });
     });
-
-    it('should throw an error when choice is not valid', function() {
-      var fixture = ['foo', 'bar', 'baz'];
-      var choices = new Choices(fixture);
-      var count = 0;
-
-      assert.throws(function() {
-        count++;
-        choices.get({});
-      }, /expected/);
-
-      assert.equal(count, 1);
-    });
   });
 
   describe('.key', function() {

@@ -302,14 +302,18 @@ Choices.prototype.getIndex = function(key) {
  * @api public
  */
 
-Choices.prototype.get = function(key) {
+Choices.prototype.get = function(key, prop) {
   if (typeof key === 'string') {
     key = this.getIndex(key);
   }
   if (!utils.isNumber(key)) {
-    throw new TypeError('expected index to be a number or string');
+    return null;
   }
-  return this.getChoice(key);
+  var choice = this.getChoice(key);
+  if (choice && typeof prop === 'string') {
+    return choice[prop];
+  }
+  return choice;
 };
 
 /**
