@@ -32,7 +32,7 @@
     "kind-of": "^4.0.0",
     "lazy-cache": "^2.0.2",
     "log-utils": "^0.2.1",
-    "prompt-pointer": "^1.0.0",
+    "pointer-symbol": "^1.0.0",
     "radio-symbol": "^2.0.0",
     "set-value": "^1.0.0",
     "strip-color": "^0.1.0",

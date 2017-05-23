@@ -10,7 +10,7 @@ var Choices = require('..');
 
 // these are different on each platform
 var radio = require('radio-symbol');
-var pointer = require('prompt-pointer');
+var pointer = require('pointer-symbol');
 var p = '\u001b[36m' + pointer() + '\u001b[39m';
 var dis = radio.disabled;
 var off = radio.off;
