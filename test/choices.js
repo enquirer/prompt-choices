@@ -840,8 +840,8 @@ describe('prompt-choices', function() {
     it('should paginate choices when specified', function() {
       var fixture = ['foo', 'bar', 'baz', 'qux', 'fez', 'faz'];
       var choices = new Choices(fixture);
-      var res = choices.render(0, {paginate: true, limit: 4});
-      assert.equal(res, '\n ' + off + ' bar\n ' + off + ' baz\n ' + off + ' qux\n ' + off + ' fez\n\u001b[2m(Move up and down to reveal more choices)\u001b[22m');
+      var res = choices.render(0, {limit: 4});
+      assert.equal(res, '\n' + p + off + ' foo\n ◯ bar\n ◯ baz\n\u001b[2m(Move up and down to reveal more choices)\u001b[22m');
     });
   });
 
