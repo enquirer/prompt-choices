@@ -44,6 +44,32 @@ function Choices(choices, options) {
 }
 
 /**
+ * Render choices.
+ *
+ * @param {Number} `position` Cursor position
+ * @param {Object} `options`
+ * @return {String}
+ * @api public
+ */
+
+Choices.prototype.render = function(position, options) {
+  var opts = utils.extend({limit: 7}, this.options, options);
+  var buf = '';
+
+  if (opts.radio === true) {
+    opts.limit += 2;
+  }
+
+  this.position = position || 0;
+  for (var i = 0; i < this.choices.length; i++) {
+    buf += this.choices[i].render(this.position, opts);
+  }
+
+  var str = '\n' + buf.replace(/\s+$/, '');
+  return this.paginator.paginate(str, this.position, opts);
+};
+
+/**
  * Create a new `Choice` object.
  *
  * ```js
@@ -211,7 +237,6 @@ Choices.prototype.toGroups = function(choices) {
     head.push(none);
   }
 
-  head.unshift(blank);
   return head.concat(tail);
 };
 
@@ -292,10 +317,13 @@ Choices.prototype.getIndex = function(key) {
 };
 
 /**
- * Get the choice or separator object at the specified index.
+ * Get the choice at the specified index.
  *
  * ```js
  * var choice = choices.get(1);
+ * //=> {name: 'foo'}
+ * var choice = choices.get(1, 'name');
+ * //=> 'foo'
  * ```
  * @param {Number|String} `key` The name or index of the object to get
  * @return {Object} Returns the specified choice
@@ -314,6 +342,17 @@ Choices.prototype.get = function(key, prop) {
     return choice[prop];
   }
   return choice;
+};
+
+/**
+ * Return the `.key` property from the choice at the given index.
+ * @param {String} `key` Property name to use for plucking objects.
+ * @return {Array} Plucked objects
+ * @api public
+ */
+
+Choices.prototype.key = function(val) {
+  return this.get(val, 'key');
 };
 
 /**
@@ -488,6 +527,11 @@ Choices.prototype.radio = function() {
   this.update();
 };
 
+/**
+ * Update "radio" choices to ensure that `all` and `none` are
+ * correct based on other choices.
+ */
+
 Choices.prototype.update = function() {
   if (this.all) {
     this.check('all');
@@ -502,32 +546,6 @@ Choices.prototype.update = function() {
   if (this.checked.length) {
     this.uncheck(['all', 'none']);
   }
-};
-
-/**
- * Render the current choice "line".
- *
- * @param {Number} `position` Cursor position
- * @param {Object} `options`
- * @return {String}
- * @api public
- */
-
-Choices.prototype.render = function(position, options) {
-  var opts = utils.extend({limit: 7}, this.options, options);
-  var buf = '';
-
-  if (opts.radio === true) {
-    opts.limit += 2;
-  }
-
-  this.position = position || 0;
-  for (var i = 0; i < this.choices.length; i++) {
-    buf += this.choices[i].render(this.position, opts);
-  }
-
-  var str = '\n' + buf.replace(/\s+$/, '');
-  return this.paginator.paginate(str, this.position, opts.limit);
 };
 
 /**
@@ -604,17 +622,6 @@ Choices.prototype.isItem = function(choice) {
 
 Choices.prototype.isValidIndex = function(idx) {
   return utils.isNumber(idx) && idx !== -1 && idx < this.items.length;
-};
-
-/**
- * Return the `.key` property from the choice at the given index.
- * @param {String} `key` Property name to use for plucking objects.
- * @return {Array} Plucked objects
- * @api public
- */
-
-Choices.prototype.key = function(key) {
-  return this.getChoice(key).key;
 };
 
 /**
