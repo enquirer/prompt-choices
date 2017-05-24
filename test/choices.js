@@ -849,14 +849,14 @@ describe('prompt-choices', function() {
     it('should allow .actions to be set', function() {
       var choices = new Choices();
       assert.doesNotThrow(function() {
-        choices.actions = new Actions(choices);
+        choices.actions = new Actions({choices: choices});
       });
     });
 
     it('should move the pointer up', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
-      var actions = new Actions(choices);
+      var actions = new Actions({choices: choices});
       var res = choices.render(0);
 
       assert.equal(res, '\n' + p + off + ' foo\n ' + off + ' bar\n ' + off + ' baz');
@@ -870,7 +870,7 @@ describe('prompt-choices', function() {
     it('should move the cursor up one row', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
-      var actions = new Actions(choices);
+      var actions = new Actions({choices: choices});
       var res = choices.render(1);
 
       assert.equal(choices.position, 1);
@@ -885,7 +885,7 @@ describe('prompt-choices', function() {
     it('should move the cursor and select the given number', function() {
       var fixture = ['foo', 'bar', 'baz'];
       var choices = new Choices(fixture);
-      var actions = new Actions(choices);
+      var actions = new Actions({choices: choices});
 
       var res = choices.render(1);
 
@@ -911,7 +911,7 @@ describe('prompt-choices', function() {
     it('should use a custom Actions instance to move the cursor', function() {
       var fixture = ['foo', 'bar'];
       var choices = new Choices(fixture);
-      var actions = new Actions(choices);
+      var actions = new Actions({choices: choices});
       var res = choices.render(1);
       assert.equal(res, '\n ' + off + ' foo\n' + p + off + ' bar');
 

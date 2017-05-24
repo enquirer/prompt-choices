@@ -7,7 +7,6 @@ var extend = require('extend-shallow');
 var visit = require('collection-visit');
 var Choice = require('./lib/choice');
 var utils = require('./lib/utils');
-var log = require('log-utils');
 
 /**
  * Create a new `Choices` collection.
@@ -178,7 +177,6 @@ Choices.prototype.toGroups = function(choices) {
     throw new TypeError('expected choices to be an object');
   }
 
-  var blank = this.separator('');
   var line = this.separator(this.options);
   var keys = Object.keys(choices);
   var head = [];
@@ -204,12 +202,10 @@ Choices.prototype.toGroups = function(choices) {
     if (key !== 'all') {
       tail.push(select);
     }
-    var len = arr.length;
-    var idx = -1;
 
     for (var j = 0; j < arr.length; j++) {
       var choice = this.choice(arr[j]);
-      choice.type = 'option',
+      choice.type = 'option';
       choice.group = select;
       choice.groupName = key;
       select.choices.push(choice);
