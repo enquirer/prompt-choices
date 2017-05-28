@@ -1,5 +1,6 @@
 'use strict';
 
+var swap = require('arr-swap');
 var Paginator = require('terminal-paginator');
 var debug = require('debug')('prompt-choices');
 var define = require('define-property');
@@ -74,13 +75,15 @@ Choices.prototype.render = function(position, options) {
  * ```js
  * choices.choice('blue');
  * ```
- * @param {String|Object} `choice`
+ * @param {String|Object} `val`
  * @return {Object} Returns a choice object.
  * @api public
  */
 
-Choices.prototype.choice = function(choice) {
-  return new Choice(choice, this.options);
+Choices.prototype.choice = function(val) {
+  var choice = new Choice(val, this.options);
+  define(choice, 'parent', this);
+  return choice;
 };
 
 /**
@@ -140,7 +143,7 @@ Choices.prototype.addChoice = function(choice) {
  */
 
 Choices.prototype.addChoices = function(choices) {
-  if (this.options.radio === true && Array.isArray(choices) && choices.length > 2) {
+  if (this.options.radio === true && Array.isArray(choices) && choices.length > 1) {
     choices = { all: choices };
   }
 
@@ -284,7 +287,12 @@ Choices.prototype.getChoice = function(idx) {
   if (typeof idx === 'string') {
     idx = this.getIndex(idx);
   }
-  return this.items[idx];
+
+  var choice = this.items[idx];
+  if (choice) {
+    choice.index = idx;
+    return choice;
+  }
 };
 
 /**
@@ -338,6 +346,23 @@ Choices.prototype.get = function(key, prop) {
     return choice[prop];
   }
   return choice;
+};
+
+/**
+ * Clear all choices from the instance. This is useful when you
+ * need to update the indices of choices without re-instantiating.
+ *
+ * ```js
+ * choices.clear();
+ * ```
+ * @api public
+ */
+
+Choices.prototype.clear = function() {
+  this.choices = [];
+  this.items = [];
+  this.keymap = {};
+  this.keys = [];
 };
 
 /**
@@ -542,6 +567,22 @@ Choices.prototype.update = function() {
   if (this.checked.length) {
     this.uncheck(['all', 'none']);
   }
+};
+
+/**
+ * Swap two choices in the choices array.
+ *
+ * @param {String|Number} `a`
+ * @param {String|Number} `b`
+ * @return {Object} Returns the `Choices` instance
+ * @api public
+ */
+
+Choices.prototype.swap = function(a, b) {
+  var choices = swap(this.choices.slice(), a, b);
+  this.clear();
+  this.addChoices(choices);
+  return this;
 };
 
 /**
