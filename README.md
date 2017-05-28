@@ -19,7 +19,7 @@ var choices = new Choices(['foo', 'bar', 'baz']);
 
 ## API
 
-### [Choices](index.js#L22)
+### [Choices](index.js#L23)
 
 Create a new `Choices` collection.
 
@@ -34,7 +34,7 @@ var choices = new Choices(['foo', 'bar', 'baz']);
 var choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
 ```
 
-### [.render](index.js#L54)
+### [.render](index.js#L55)
 
 Render choices.
 
@@ -44,13 +44,13 @@ Render choices.
 * `options` **{Object}**
 * `returns` **{String}**
 
-### [.choice](index.js#L82)
+### [.choice](index.js#L83)
 
 Create a new `Choice` object.
 
 **Params**
 
-* `choice` **{String|Object}**
+* `val` **{String|Object}**
 * `returns` **{Object}**: Returns a choice object.
 
 **Example**
@@ -59,7 +59,7 @@ Create a new `Choice` object.
 choices.choice('blue');
 ```
 
-### [.toChoice](index.js#L98)
+### [.toChoice](index.js#L101)
 
 Returns a normalized `choice` object.
 
@@ -75,7 +75,7 @@ choices.toChoice('foo');
 choices.toChoice({name: 'foo'});
 ```
 
-### [.addChoice](index.js#L118)
+### [.addChoice](index.js#L121)
 
 Add a normalized `choice` object to the `choices` array.
 
@@ -89,7 +89,7 @@ Add a normalized `choice` object to the `choices` array.
 choices.addChoice(['foo', 'bar', 'baz']);
 ```
 
-### [.addChoices](index.js#L142)
+### [.addChoices](index.js#L145)
 
 Add an array of normalized `choice` objects to the `choices` array. This method is called in the constructor, but it can also be used to add choices after instantiation.
 
@@ -103,7 +103,7 @@ Add an array of normalized `choice` objects to the `choices` array. This method 
 choices.addChoices(['foo', 'bar', 'baz']);
 ```
 
-### [.toGroups](index.js#L175)
+### [.toGroups](index.js#L178)
 
 Create choice "groups" from the given choices object. ![choice groups](docs/prompt-groups.gif).
 
@@ -121,7 +121,7 @@ choices.toGroups({
 });
 ```
 
-### [.separator](index.js#L251)
+### [.separator](index.js#L254)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -136,7 +136,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 choices.separator();
 ```
 
-### [.hasChoice](index.js#L267)
+### [.hasChoice](index.js#L270)
 
 Returns true if a choice exists.
 
@@ -152,7 +152,7 @@ choices.hasChoice(1);
 choices.hasChoice('foo');
 ```
 
-### [.getChoice](index.js#L283)
+### [.getChoice](index.js#L286)
 
 Get a non-separator choice from the collection.
 
@@ -168,7 +168,7 @@ choices.getChoice(1);
 choices.getChoice('foo');
 ```
 
-### [.getIndex](index.js#L305)
+### [.getIndex](index.js#L313)
 
 Get the index of a non-separator choice from the collection.
 
@@ -187,7 +187,7 @@ console.log(choices.getIndex('bar')); //=> 1
 console.log(choices.getIndex('qux')); //=> -1
 ```
 
-### [.get](index.js#L329)
+### [.get](index.js#L337)
 
 Get the choice at the specified index.
 
@@ -205,7 +205,17 @@ var choice = choices.get(1, 'name');
 //=> 'foo'
 ```
 
-### [.key](index.js#L350)
+### [.clear](index.js#L361)
+
+Clear all choices from the instance. This is useful when you need to update the indices of choices without re-instantiating.
+
+**Example**
+
+```js
+choices.clear();
+```
+
+### [.key](index.js#L375)
 
 Return the `.key` property from the choice at the given index.
 
@@ -214,7 +224,7 @@ Return the `.key` property from the choice at the given index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.check](index.js#L364)
+### [.check](index.js#L389)
 
 Check the choice at the given `idx`.
 
@@ -228,7 +238,7 @@ Check the choice at the given `idx`.
 choices.check(1);
 ```
 
-### [.uncheck](index.js#L389)
+### [.uncheck](index.js#L414)
 
 Disable the choice at the given `idx`.
 
@@ -242,7 +252,7 @@ Disable the choice at the given `idx`.
 choices.uncheck(1);
 ```
 
-### [.isChecked](index.js#L420)
+### [.isChecked](index.js#L445)
 
 Returns true if a choice is checked.
 
@@ -262,7 +272,7 @@ console.log(choices.isChecked('foo'));
 //=> true
 ```
 
-### [.toggle](index.js#L448)
+### [.toggle](index.js#L473)
 
 Toggle the choice at the given `idx`.
 
@@ -278,7 +288,17 @@ choices.toggle(1);
 choices.toggle(1, true);
 ```
 
-### [.where](index.js#L556)
+### [.swap](index.js#L581)
+
+Swap two choices in the choices array.
+
+**Params**
+
+* `a` **{String|Number}**
+* `b` **{String|Number}**
+* `returns` **{Object}**: Returns the `Choices` instance
+
+### [.where](index.js#L597)
 
 Return choice values for choices that return truthy based
 on the given `val`.
@@ -288,7 +308,7 @@ on the given `val`.
 * `val` **{Array|Object|Function|String|RegExp}**
 * `returns` **{Array}**: Matching choices or empty array
 
-### [.isItem](index.js#L604)
+### [.isItem](index.js#L645)
 
 Returns true if the given `choice` is a valid choice item, and
 not a "group" or "radio" choice.
@@ -298,7 +318,7 @@ not a "group" or "radio" choice.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.isValidIndex](index.js#L619)
+### [.isValidIndex](index.js#L660)
 
 Returns true if the given `index` is a valid choice index.
 
@@ -307,7 +327,7 @@ Returns true if the given `index` is a valid choice index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.pluck](index.js#L630)
+### [.pluck](index.js#L671)
 
 Pluck an object with the specified key from the choices collection.
 
@@ -316,15 +336,15 @@ Pluck an object with the specified key from the choices collection.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.checked](index.js#L666)
+### [.checked](index.js#L707)
 
 Getter for getting the checked choices from the collection.
 
-### [.length](index.js#L708)
+### [.length](index.js#L749)
 
 Getter for getting the length of the collection.
 
-### [.Separator](index.js#L728)
+### [.Separator](index.js#L769)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -339,7 +359,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 new Choices.Separator();
 ```
 
-### [.isChoices](index.js#L744)
+### [.isChoices](index.js#L785)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -357,7 +377,7 @@ console.log(Choices.isChoices(choices)); //=> true
 console.log(Choices.isChoices({})); //=> false
 ```
 
-### [.isChoice](index.js#L763)
+### [.isChoice](index.js#L804)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -462,4 +482,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on May 24, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on May 28, 2017._
