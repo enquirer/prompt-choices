@@ -68,6 +68,40 @@ describe('prompt-choices', function() {
     });
   });
 
+  describe('.pointer', function() {
+    it('should use a custom pointer', function() {
+      var fixture = ['foo', 'bar'];
+      var choices = new Choices(fixture, {pointer: '+++'});
+      var actions = new Actions({choices: choices});
+      var res = choices.render(1);
+      assert.equal(res, '\n   ' + off + ' foo\n+++' + off + ' bar');
+    });
+  });
+
+  describe('.symbol', function() {
+    it('should use a custom checkbox symbol', function() {
+      var fixture = ['foo', 'bar'];
+      var choices = new Choices(fixture, {checkbox: {on: '[x]', off: '[ ]'}});
+      var actions = new Actions({choices: choices});
+      var res = choices.render(0);
+      assert.equal(res, '\n' + p + '[ ] foo\n [ ] bar');
+      choices.check(1);
+      res = choices.render(0);
+      assert.equal(res, '\n' + p + '[ ] foo\n [x] bar');
+    });
+
+    it('should use a custom symbol', function() {
+      var fixture = ['foo', 'bar'];
+      var choices = new Choices(fixture, {symbol: {on: '[x]', off: '[ ]'}});
+      var actions = new Actions({choices: choices});
+      var res = choices.render(0);
+      assert.equal(res, '\n' + p + '[ ] foo\n [ ] bar');
+      choices.check(1);
+      res = choices.render(0);
+      assert.equal(res, '\n' + p + '[ ] foo\n [x] bar');
+    });
+  });
+
   describe('.length', function() {
     it('should get the length of the choices array', function() {
       var fixture = ['foo', 'bar', 'baz'];
@@ -650,12 +684,12 @@ describe('prompt-choices', function() {
   });
 
   describe('.pluck', function() {
-    it('should pluck choice content by property name', function () {
+    it('should pluck choice content by property name', function() {
       var choices = new Choices([{name: 'f', key: 'foo'}, {name: 'b', key: 'bar'}]);
       assert.deepEqual(choices.pluck('name'), ['f', 'b']);
     });
 
-    it('should pluck choice content by property value', function () {
+    it('should pluck choice content by property value', function() {
       var choices = new Choices([{name: 'f', key: 'foo'}, {name: 'b', key: 'bar'}]);
       assert.deepEqual(choices.pluck('key'), ['foo', 'bar']);
     });
@@ -841,7 +875,7 @@ describe('prompt-choices', function() {
       var fixture = ['foo', 'bar', 'baz', 'qux', 'fez', 'faz'];
       var choices = new Choices(fixture);
       var res = choices.render(0, {limit: 4});
-      assert.equal(res, '\n' + p + off + ' foo\n ◯ bar\n ◯ baz\n\u001b[2m(Move up and down to reveal more choices)\u001b[22m');
+      assert.equal(res, '\n' + p + off + ' foo\n ◯ bar\n ◯ baz\n ◯ qux\n\u001b[2m(Move up and down to reveal more choices)\u001b[22m');
     });
   });
 

@@ -27,7 +27,7 @@ function Choices(choices, options) {
   }
 
   define(this, 'isChoices', true);
-  this.options = extend({}, options);
+  this.options = options || {};
   this.answers = this.options.answers || {};
   this.paginator = new Paginator(this.options);
   this.choices = [];
@@ -126,6 +126,12 @@ Choices.prototype.addChoice = function(choice) {
     this.keys.push(choice.key);
     this.items.push(choice);
   }
+
+  if (this.default == null && choice.default === true) {
+    this.default = choice.name;
+    choice.default = false;
+  }
+
   this.choices.push(choice);
   return this;
 };
@@ -395,7 +401,7 @@ Choices.prototype.check = function(val) {
     return this;
   }
   var choice = this.get(val);
-  if (choice) {
+  if (choice != null) {
     choice.checked = true;
   }
   return this;
@@ -697,6 +703,37 @@ Choices.prototype.some = function() {
 Choices.prototype.every = function() {
   return this.items.every.apply(this.items, arguments);
 };
+
+/**
+ * Getter for getting the default choice.
+ * @name .default
+ * @api public
+ */
+
+Object.defineProperty(Choices.prototype, 'default', {
+  configurable: true,
+  set: function(val) {
+    this._default = this.getIndex(val);
+  },
+  get: function() {
+    if (this._default == null) {
+      var len = this.items.length;
+      var idx = -1;
+      while (++idx < len) {
+        var choice = this.items[idx];
+        if (choice.default === true) {
+          define(this, '_default', choice.index);
+          break;
+        }
+      }
+    }
+
+    if (this._default != null) {
+      this.check(this.getIndex(this._default));
+    }
+    return this._default;
+  }
+});
 
 /**
  * Getter for getting the checked choices from the collection.

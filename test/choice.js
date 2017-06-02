@@ -72,7 +72,7 @@ describe('choice', function() {
     assert.deepEqual(choice.pointer, p);
   });
 
-  it('should throw when trying to set choice.symbol', function() {
+  it('should throw when trying to set choice.symbol as a string', function() {
     var choice = new Choice({name: 'foo'});
     assert.throws(function() {
       choice.symbol = 'foo';
