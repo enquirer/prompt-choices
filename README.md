@@ -89,7 +89,7 @@ Add a normalized `choice` object to the `choices` array.
 choices.addChoice(['foo', 'bar', 'baz']);
 ```
 
-### [.addChoices](index.js#L145)
+### [.addChoices](index.js#L151)
 
 Add an array of normalized `choice` objects to the `choices` array. This method is called in the constructor, but it can also be used to add choices after instantiation.
 
@@ -103,7 +103,7 @@ Add an array of normalized `choice` objects to the `choices` array. This method 
 choices.addChoices(['foo', 'bar', 'baz']);
 ```
 
-### [.toGroups](index.js#L178)
+### [.toGroups](index.js#L184)
 
 Create choice "groups" from the given choices object. ![choice groups](docs/prompt-groups.gif).
 
@@ -121,7 +121,7 @@ choices.toGroups({
 });
 ```
 
-### [.separator](index.js#L254)
+### [.separator](index.js#L260)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -136,7 +136,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 choices.separator();
 ```
 
-### [.hasChoice](index.js#L270)
+### [.hasChoice](index.js#L276)
 
 Returns true if a choice exists.
 
@@ -152,7 +152,7 @@ choices.hasChoice(1);
 choices.hasChoice('foo');
 ```
 
-### [.getChoice](index.js#L286)
+### [.getChoice](index.js#L292)
 
 Get a non-separator choice from the collection.
 
@@ -168,7 +168,7 @@ choices.getChoice(1);
 choices.getChoice('foo');
 ```
 
-### [.getIndex](index.js#L313)
+### [.getIndex](index.js#L319)
 
 Get the index of a non-separator choice from the collection.
 
@@ -187,7 +187,7 @@ console.log(choices.getIndex('bar')); //=> 1
 console.log(choices.getIndex('qux')); //=> -1
 ```
 
-### [.get](index.js#L337)
+### [.get](index.js#L343)
 
 Get the choice at the specified index.
 
@@ -205,7 +205,7 @@ var choice = choices.get(1, 'name');
 //=> 'foo'
 ```
 
-### [.clear](index.js#L361)
+### [.clear](index.js#L367)
 
 Clear all choices from the instance. This is useful when you need to update the indices of choices without re-instantiating.
 
@@ -215,7 +215,7 @@ Clear all choices from the instance. This is useful when you need to update the 
 choices.clear();
 ```
 
-### [.key](index.js#L375)
+### [.key](index.js#L381)
 
 Return the `.key` property from the choice at the given index.
 
@@ -224,7 +224,7 @@ Return the `.key` property from the choice at the given index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.check](index.js#L389)
+### [.check](index.js#L395)
 
 Check the choice at the given `idx`.
 
@@ -238,7 +238,7 @@ Check the choice at the given `idx`.
 choices.check(1);
 ```
 
-### [.uncheck](index.js#L414)
+### [.uncheck](index.js#L420)
 
 Disable the choice at the given `idx`.
 
@@ -252,7 +252,7 @@ Disable the choice at the given `idx`.
 choices.uncheck(1);
 ```
 
-### [.isChecked](index.js#L445)
+### [.isChecked](index.js#L451)
 
 Returns true if a choice is checked.
 
@@ -272,7 +272,7 @@ console.log(choices.isChecked('foo'));
 //=> true
 ```
 
-### [.toggle](index.js#L473)
+### [.toggle](index.js#L479)
 
 Toggle the choice at the given `idx`.
 
@@ -288,7 +288,7 @@ choices.toggle(1);
 choices.toggle(1, true);
 ```
 
-### [.swap](index.js#L581)
+### [.swap](index.js#L587)
 
 Swap two choices in the choices array.
 
@@ -298,7 +298,7 @@ Swap two choices in the choices array.
 * `b` **{String|Number}**
 * `returns` **{Object}**: Returns the `Choices` instance
 
-### [.where](index.js#L597)
+### [.where](index.js#L603)
 
 Return choice values for choices that return truthy based
 on the given `val`.
@@ -308,7 +308,7 @@ on the given `val`.
 * `val` **{Array|Object|Function|String|RegExp}**
 * `returns` **{Array}**: Matching choices or empty array
 
-### [.isItem](index.js#L645)
+### [.isItem](index.js#L651)
 
 Returns true if the given `choice` is a valid choice item, and
 not a "group" or "radio" choice.
@@ -318,7 +318,7 @@ not a "group" or "radio" choice.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.isValidIndex](index.js#L660)
+### [.isValidIndex](index.js#L666)
 
 Returns true if the given `index` is a valid choice index.
 
@@ -327,7 +327,7 @@ Returns true if the given `index` is a valid choice index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.pluck](index.js#L671)
+### [.pluck](index.js#L677)
 
 Pluck an object with the specified key from the choices collection.
 
@@ -336,15 +336,19 @@ Pluck an object with the specified key from the choices collection.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.checked](index.js#L707)
+### [.default](index.js#L713)
+
+Getter for getting the default choice.
+
+### [.checked](index.js#L744)
 
 Getter for getting the checked choices from the collection.
 
-### [.length](index.js#L749)
+### [.length](index.js#L786)
 
 Getter for getting the length of the collection.
 
-### [.Separator](index.js#L769)
+### [.Separator](index.js#L806)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -359,7 +363,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 new Choices.Separator();
 ```
 
-### [.isChoices](index.js#L785)
+### [.isChoices](index.js#L822)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -377,7 +381,7 @@ console.log(Choices.isChoices(choices)); //=> true
 console.log(Choices.isChoices({})); //=> false
 ```
 
-### [.isChoice](index.js#L804)
+### [.isChoice](index.js#L841)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -440,11 +444,11 @@ Some of the code in this library was initially based on the `Choices` class in I
 
 ### Related projects
 
-* [enquirer](https://www.npmjs.com/package/enquirer): Intuitive, plugin-based prompt system for node.js. Much faster and lighter alternative to Inquirer, with all… [more](https://github.com/enquirer/enquirer) | [homepage](https://github.com/enquirer/enquirer "Intuitive, plugin-based prompt system for node.js. Much faster and lighter alternative to Inquirer, with all the same prompt types and more, but without the bloat.")
+* [enquirer](https://www.npmjs.com/package/enquirer): Intuitive, plugin-based prompt system for node.js. | [homepage](http://enquirer.io "Intuitive, plugin-based prompt system for node.js.")
 * [prompt-base](https://www.npmjs.com/package/prompt-base): Base prompt module used for creating custom prompts. | [homepage](https://github.com/enquirer/prompt-base "Base prompt module used for creating custom prompts.")
 * [prompt-checkbox](https://www.npmjs.com/package/prompt-checkbox): Multiple-choice/checkbox prompt. Can be used standalone or with a prompt system like [Enquirer]. | [homepage](https://github.com/enquirer/prompt-checkbox "Multiple-choice/checkbox prompt. Can be used standalone or with a prompt system like [Enquirer].")
 * [prompt-question](https://www.npmjs.com/package/prompt-question): Question object, used by Enquirer and prompt plugins. | [homepage](https://github.com/enquirer/prompt-question "Question object, used by Enquirer and prompt plugins.")
-* [prompt-radio](https://www.npmjs.com/package/prompt-radio): Radio prompt. This prompt behaves like other radio-button interfaces, where only one choice is enabled… [more](https://github.com/enquirer/prompt-radio) | [homepage](https://github.com/enquirer/prompt-radio "Radio prompt. This prompt behaves like other radio-button interfaces, where only one choice is enabled whilst all others are disabled. Can be used as a standalone prompt, or with a prompt system like [Enquirer].")
+* [prompt-radio](https://www.npmjs.com/package/prompt-radio): Radio prompt. Can be used as a standalone prompt, or as a plugin for [Enquirer]. | [homepage](https://github.com/enquirer/prompt-radio "Radio prompt. Can be used as a standalone prompt, or as a plugin for [Enquirer].")
 
 ### Contributing
 
@@ -482,4 +486,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on May 28, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on June 02, 2017._
