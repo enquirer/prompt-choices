@@ -4,7 +4,6 @@ var swap = require('arr-swap');
 var Paginator = require('terminal-paginator');
 var debug = require('debug')('prompt-choices');
 var define = require('define-property');
-var extend = require('extend-shallow');
 var visit = require('collection-visit');
 var Choice = require('./lib/choice');
 var utils = require('./lib/utils');
