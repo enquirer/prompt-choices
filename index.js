@@ -769,7 +769,7 @@ Object.defineProperty(Choices.prototype, 'all', {
 
 Object.defineProperty(Choices.prototype, 'none', {
   set: function() {
-    throw new Error('.none is a getter and cannot be defined');
+    throw new Error('.none is a getter and may not be defined');
   },
   get: function() {
     return this.checked.length === 0;
@@ -813,8 +813,8 @@ Choices.Separator = utils.Separator;
  * console.log(Choices.isChoices(choices)); //=> true
  * console.log(Choices.isChoices({})); //=> false
  * ```
- * @param {String} `separator` Optionally pass a string to use as the separator.
- * @return {Object} Returns a separator object.
+ * @param {String} `choices` The value to test.
+ * @return {Boolean} Returns true if the given value is an instance of `Choices`.
  * @api public
  */
 
@@ -832,8 +832,8 @@ Choices.isChoices = function(choices) {
  * console.log(Choices.isChoice(foo)); //=> true
  * console.log(Choices.isChoice({})); //=> false
  * ```
- * @param {String} `separator` Optionally pass a string to use as the separator.
- * @return {Object} Returns a separator object.
+ * @param {String} `choice` The value to test.
+ * @return {Boolean} Returns true if the given value is an instance of `Choice`.
  * @api public
  */
 
