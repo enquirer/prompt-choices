@@ -61,11 +61,36 @@ Choices.prototype.render = function(position, options) {
 
   this.position = position || 0;
   for (var i = 0; i < this.choices.length; i++) {
-    buf += this.choices[i].render(this.position, opts);
+    var choice = this.choices[i];
+    if (opts && typeof opts.renderChoice === 'function') {
+      buf += opts.renderChoice.call(this, this.position, choice, opts);
+    } else {
+      buf += choice.render(this.position, opts);
+    }
   }
 
   var str = '\n' + buf.replace(/\s+$/, '');
   return this.paginator.paginate(str, this.position, opts);
+};
+
+/**
+ * Render a specific choice. This can be overridden in prompts.
+ *
+ * ```js
+ * choices.render = function(choice, position, options) {
+ *   // do custom logic
+ *   return '';
+ * };
+ * ```
+ * @param {Object} `choice`
+ * @param {Number} `position`
+ * @param {Object} `options`
+ * @return {String} Returns the line to render.
+ * @api public
+ */
+
+Choices.prototype.renderChoice = function(choice, position, options) {
+  return choice.render.call(choice, position, options);
 };
 
 /**
