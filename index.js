@@ -775,7 +775,7 @@ Object.defineProperty(Choices.prototype, 'checked', {
         return acc;
       }
       if (choice.checked === true) {
-        acc.push(choice.value);
+        acc.push(choice.name);
       }
       return acc;
     }.bind(this), []);
