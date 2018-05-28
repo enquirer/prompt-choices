@@ -1,26 +1,24 @@
 'use strict';
 
-var swap = require('arr-swap');
-var Paginator = require('terminal-paginator');
-var debug = require('debug')('prompt-choices');
-var define = require('define-property');
-var visit = require('collection-visit');
-var Choice = require('./lib/choice');
-var utils = require('./lib/utils');
+const swap = require('arr-swap');
+const Paginator = require('terminal-paginator');
+const define = require('define-property');
+const visit = require('collection-visit');
+const Choice = require('./lib/choice');
+const utils = require('./lib/utils');
 
 /**
  * Create a new `Choices` collection.
  *
  * ```js
- * var choices = new Choices(['foo', 'bar', 'baz']);
- * var choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
+ * const choices = new Choices(['foo', 'bar', 'baz']);
+ * const choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
  * ```
  * @param {Array} `choices` One or more `choice` strings or objects.
  * @api public
  */
 
 function Choices(choices, options) {
-  debug('initializing from <%s>', __filename);
   if (utils.isObject(choices) && choices.isChoices) {
     return choices;
   }
@@ -52,16 +50,16 @@ function Choices(choices, options) {
  */
 
 Choices.prototype.render = function(position, options) {
-  var opts = utils.extend({limit: 7}, this.options, options);
-  var buf = '';
+  const opts = Object.assign({limit: 7}, this.options, options);
+  let buf = '';
 
   if (opts.radio === true) {
     opts.limit += 2;
   }
 
   this.position = position || 0;
-  for (var i = 0; i < this.choices.length; i++) {
-    var choice = this.choices[i];
+  for (let i = 0; i < this.choices.length; i++) {
+    let choice = this.choices[i];
     if (opts && typeof opts.renderChoice === 'function') {
       buf += opts.renderChoice.call(this, this.position, choice, opts);
     } else {
@@ -69,7 +67,7 @@ Choices.prototype.render = function(position, options) {
     }
   }
 
-  var str = '\n' + buf.replace(/\s+$/, '');
+  const str = '\n' + buf.replace(/\s+$/, '');
   return this.paginator.paginate(str, this.position, opts);
 };
 
@@ -105,7 +103,7 @@ Choices.prototype.renderChoice = function(choice, position, options) {
  */
 
 Choices.prototype.choice = function(val) {
-  var choice = new Choice(val, this.options);
+  const choice = new Choice(val, this.options);
   define(choice, 'parent', this);
   return choice;
 };
@@ -185,8 +183,8 @@ Choices.prototype.addChoices = function(choices) {
     return;
   }
 
-  for (var i = 0; i < choices.length; i++) {
-    this.addChoice(choices[i]);
+  for (const choice of choices) {
+    this.addChoice(choice);
   }
 };
 
@@ -210,22 +208,22 @@ Choices.prototype.toGroups = function(choices) {
     throw new TypeError('expected choices to be an object');
   }
 
-  var line = this.separator(this.options);
-  var keys = Object.keys(choices);
-  var head = [];
-  var tail = this.options.radio ? [line] : [];
-  var items = [];
+  let line = this.separator(this.options);
+  let keys = Object.keys(choices);
+  let head = [];
+  let tail = this.options.radio ? [line] : [];
+  let items = [];
 
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    var val = choices[key];
-    var arr = (utils.isObject(val) && val.choices) ? val.choices : val;
+  for (let i = 0; i < keys.length; i++) {
+    let key = keys[i];
+    let val = choices[key];
+    let arr = (utils.isObject(val) && val.choices) ? val.choices : val;
 
     if (!Array.isArray(arr)) {
       throw new TypeError('expected group choices to be an array');
     }
 
-    var select = this.choice({
+    let select = this.choice({
       name: key,
       type: 'group',
       choices: [],
@@ -236,8 +234,8 @@ Choices.prototype.toGroups = function(choices) {
       tail.push(select);
     }
 
-    for (var j = 0; j < arr.length; j++) {
-      var choice = this.choice(arr[j]);
+    for (let j = 0; j < arr.length; j++) {
+      let choice = this.choice(arr[j]);
       choice.type = 'option';
       choice.group = select;
       choice.groupName = key;
@@ -248,11 +246,11 @@ Choices.prototype.toGroups = function(choices) {
     }
   }
 
-  var none = {name: 'none', type: 'radio', choices: items};
-  var all = {name: 'all', type: 'radio', choices: items};
-  if (keys.length === 1 && arr.length <= 2) {
+  let none = {name: 'none', type: 'radio', choices: items};
+  let all = {name: 'all', type: 'radio', choices: items};
+  if (keys.length === 1 && items.length <= 2) {
     return tail.filter(function(choice) {
-      var isOption = choice.type === 'option';
+      let isOption = choice.type === 'option';
       delete choice.type;
       return isOption;
     });
@@ -318,7 +316,7 @@ Choices.prototype.getChoice = function(idx) {
     idx = this.getIndex(idx);
   }
 
-  var choice = this.items[idx];
+  const choice = this.items[idx];
   if (choice) {
     choice.index = idx;
     return choice;
@@ -329,7 +327,7 @@ Choices.prototype.getChoice = function(idx) {
  * Get the index of a non-separator choice from the collection.
  *
  * ```js
- * var choices = new Choices(['foo', 'bar', 'baz']);
+ * const choices = new Choices(['foo', 'bar', 'baz']);
  * console.log(choices.getIndex('foo')); //=> 0
  * console.log(choices.getIndex('baz')); //=> 2
  * console.log(choices.getIndex('bar')); //=> 1
@@ -354,9 +352,9 @@ Choices.prototype.getIndex = function(key) {
  * Get the choice at the specified index.
  *
  * ```js
- * var choice = choices.get(1);
+ * const choice = choices.get(1);
  * //=> {name: 'foo'}
- * var choice = choices.get(1, 'name');
+ * const choice = choices.get(1, 'name');
  * //=> 'foo'
  * ```
  * @param {Number|String} `key` The name or index of the object to get
@@ -371,7 +369,7 @@ Choices.prototype.get = function(key, prop) {
   if (!utils.isNumber(key)) {
     return null;
   }
-  var choice = this.getChoice(key);
+  const choice = this.getChoice(key);
   if (choice && typeof prop === 'string') {
     return choice[prop];
   }
@@ -424,7 +422,7 @@ Choices.prototype.check = function(val) {
     visit(this, 'check', val);
     return this;
   }
-  var choice = this.get(val);
+  const choice = this.get(val);
   if (choice != null) {
     choice.checked = true;
   }
@@ -449,7 +447,7 @@ Choices.prototype.uncheck = function(val) {
     visit(this, 'uncheck', val);
     return this;
   }
-  var choice = this.get(val);
+  const choice = this.get(val);
   if (choice) {
     choice.checked = false;
   }
@@ -460,7 +458,7 @@ Choices.prototype.uncheck = function(val) {
  * Returns true if a choice is checked.
  *
  * ```js
- * var choices = new Choices(['foo', 'bar', 'baz']);
+ * const choices = new Choices(['foo', 'bar', 'baz']);
  * console.log(choices.isChecked('foo'));
  * //=> false
  * choices.check('foo');
@@ -474,15 +472,15 @@ Choices.prototype.uncheck = function(val) {
 
 Choices.prototype.isChecked = function(name) {
   if (Array.isArray(name)) {
-    for (var i = 0; i < name.length; i++) {
-      if (!this.isChecked(name[i])) {
+    for (const ele of name) {
+      if (!this.isChecked(ele)) {
         return false;
       }
     }
     return true;
   }
 
-  var choice = this.get(name);
+  const choice = this.get(name);
   if (choice) {
     return choice.checked === true;
   }
@@ -510,7 +508,7 @@ Choices.prototype.toggle = function(val, radio) {
     return this;
   }
 
-  var choice = this.get(val);
+  const choice = this.get(val);
   if (!choice) {
     return this;
   }
@@ -537,7 +535,7 @@ Choices.prototype.toggle = function(val, radio) {
  */
 
 Choices.prototype.radio = function() {
-  var choice = this.get(this.position);
+  const choice = this.get(this.position);
   if (!choice) return;
 
   if (choice.type === 'group') {
@@ -609,7 +607,7 @@ Choices.prototype.update = function() {
  */
 
 Choices.prototype.swap = function(a, b) {
-  var choices = swap(this.choices.slice(), a, b);
+  const choices = swap(this.choices.slice(), a, b);
   this.clear();
   this.addChoices(choices);
   return this;
@@ -643,7 +641,7 @@ Choices.prototype.where = function(val) {
 
   if (utils.isObject(val)) {
     return this.filter(function(choice) {
-      for (var key in val) {
+      for (const key in val) {
         if (!choice.hasOwnProperty(key)) {
           return false;
         }
@@ -653,9 +651,9 @@ Choices.prototype.where = function(val) {
   }
 
   if (Array.isArray(val)) {
-    var acc = [];
-    for (var i = 0; i < val.length; i++) {
-      acc = acc.concat(this.where.call(this, val[i]));
+    let acc = [];
+    for (const ele of val) {
+      acc = acc.concat(this.where.call(this, ele));
     }
     return acc;
   }
@@ -741,17 +739,13 @@ Object.defineProperty(Choices.prototype, 'default', {
   },
   get: function() {
     if (this._default == null) {
-      var len = this.items.length;
-      var idx = -1;
-      while (++idx < len) {
-        var choice = this.items[idx];
+      for (const choice of this.items) {
         if (choice.default === true) {
           define(this, '_default', choice.index);
           break;
         }
       }
     }
-
     if (this._default != null) {
       this.check(this.getIndex(this._default));
     }
@@ -787,7 +781,7 @@ Object.defineProperty(Choices.prototype, 'all', {
     throw new Error('.all is a getter and cannot be defined');
   },
   get: function() {
-    var items = this.filter(this.isItem);
+    const items = this.filter(this.isItem);
     return items.length === this.checked.length;
   }
 });
@@ -833,8 +827,8 @@ Choices.Separator = utils.Separator;
  * Create a new `Separator` object. See [choices-separator][] for more details.
  *
  * ```js
- * var Choices = require('prompt-choices');
- * var choices = new Choices(['foo']);
+ * const Choices = require('prompt-choices');
+ * const choices = new Choices(['foo']);
  * console.log(Choices.isChoices(choices)); //=> true
  * console.log(Choices.isChoices({})); //=> false
  * ```
@@ -851,9 +845,9 @@ Choices.isChoices = function(choices) {
  * Create a new `Separator` object. See [choices-separator][] for more details.
  *
  * ```js
- * var Choices = require('prompt-choices');
- * var choices = new Choices(['foo']);
- * var foo = choices.getChoice('foo');
+ * const Choices = require('prompt-choices');
+ * const choices = new Choices(['foo']);
+ * const foo = choices.getChoice('foo');
  * console.log(Choices.isChoice(foo)); //=> true
  * console.log(Choices.isChoice({})); //=> false
  * ```
