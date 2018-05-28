@@ -2,7 +2,7 @@
 
 > Create an array of multiple choice objects for use in prompts.
 
-Follow this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), for updates on this project and others.
+Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.
 
 ## Install
 
@@ -21,7 +21,7 @@ var choices = new Choices(['foo', 'bar', 'baz']);
 
 ## API
 
-### [Choices](index.js#L22)
+### [Choices](index.js#L21)
 
 Create a new `Choices` collection.
 
@@ -32,11 +32,11 @@ Create a new `Choices` collection.
 **Example**
 
 ```js
-var choices = new Choices(['foo', 'bar', 'baz']);
-var choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
+const choices = new Choices(['foo', 'bar', 'baz']);
+const choices = new Choices([{name: 'foo'}, {name: 'bar'}, {name: 'baz'}]);
 ```
 
-### [.render](index.js#L54)
+### [.render](index.js#L52)
 
 Render choices.
 
@@ -46,7 +46,27 @@ Render choices.
 * `options` **{Object}**
 * `returns` **{String}**
 
-### [.choice](index.js#L82)
+### [.renderChoice](index.js#L90)
+
+Render a specific choice. This can be overridden in prompts.
+
+**Params**
+
+* `choice` **{Object}**
+* `position` **{Number}**
+* `options` **{Object}**
+* `returns` **{String}**: Returns the line to render.
+
+**Example**
+
+```js
+choices.render = function(choice, position, options) {
+  // do custom logic
+  return '';
+};
+```
+
+### [.choice](index.js#L105)
 
 Create a new `Choice` object.
 
@@ -61,7 +81,7 @@ Create a new `Choice` object.
 choices.choice('blue');
 ```
 
-### [.toChoice](index.js#L100)
+### [.toChoice](index.js#L123)
 
 Returns a normalized `choice` object.
 
@@ -77,7 +97,7 @@ choices.toChoice('foo');
 choices.toChoice({name: 'foo'});
 ```
 
-### [.addChoice](index.js#L120)
+### [.addChoice](index.js#L143)
 
 Add a normalized `choice` object to the `choices` array.
 
@@ -91,7 +111,7 @@ Add a normalized `choice` object to the `choices` array.
 choices.addChoice(['foo', 'bar', 'baz']);
 ```
 
-### [.addChoices](index.js#L150)
+### [.addChoices](index.js#L173)
 
 Add an array of normalized `choice` objects to the `choices` array. This method is called in the constructor, but it can also be used to add choices after instantiation.
 
@@ -105,7 +125,7 @@ Add an array of normalized `choice` objects to the `choices` array. This method 
 choices.addChoices(['foo', 'bar', 'baz']);
 ```
 
-### [.toGroups](index.js#L183)
+### [.toGroups](index.js#L206)
 
 Create choice "groups" from the given choices object. ![choice groups](docs/prompt-groups.gif).
 
@@ -123,7 +143,7 @@ choices.toGroups({
 });
 ```
 
-### [.separator](index.js#L259)
+### [.separator](index.js#L282)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -138,7 +158,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 choices.separator();
 ```
 
-### [.hasChoice](index.js#L275)
+### [.hasChoice](index.js#L298)
 
 Returns true if a choice exists.
 
@@ -154,7 +174,7 @@ choices.hasChoice(1);
 choices.hasChoice('foo');
 ```
 
-### [.getChoice](index.js#L291)
+### [.getChoice](index.js#L314)
 
 Get a non-separator choice from the collection.
 
@@ -170,7 +190,7 @@ choices.getChoice(1);
 choices.getChoice('foo');
 ```
 
-### [.getIndex](index.js#L318)
+### [.getIndex](index.js#L341)
 
 Get the index of a non-separator choice from the collection.
 
@@ -182,14 +202,14 @@ Get the index of a non-separator choice from the collection.
 **Example**
 
 ```js
-var choices = new Choices(['foo', 'bar', 'baz']);
+const choices = new Choices(['foo', 'bar', 'baz']);
 console.log(choices.getIndex('foo')); //=> 0
 console.log(choices.getIndex('baz')); //=> 2
 console.log(choices.getIndex('bar')); //=> 1
 console.log(choices.getIndex('qux')); //=> -1
 ```
 
-### [.get](index.js#L342)
+### [.get](index.js#L365)
 
 Get the choice at the specified index.
 
@@ -201,13 +221,13 @@ Get the choice at the specified index.
 **Example**
 
 ```js
-var choice = choices.get(1);
+const choice = choices.get(1);
 //=> {name: 'foo'}
-var choice = choices.get(1, 'name');
+const choice = choices.get(1, 'name');
 //=> 'foo'
 ```
 
-### [.clear](index.js#L366)
+### [.clear](index.js#L389)
 
 Clear all choices from the instance. This is useful when you need to update the indices of choices without re-instantiating.
 
@@ -217,7 +237,7 @@ Clear all choices from the instance. This is useful when you need to update the 
 choices.clear();
 ```
 
-### [.key](index.js#L380)
+### [.key](index.js#L403)
 
 Return the `.key` property from the choice at the given index.
 
@@ -226,7 +246,7 @@ Return the `.key` property from the choice at the given index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.check](index.js#L394)
+### [.check](index.js#L417)
 
 Check the choice at the given `idx`.
 
@@ -240,7 +260,7 @@ Check the choice at the given `idx`.
 choices.check(1);
 ```
 
-### [.uncheck](index.js#L419)
+### [.uncheck](index.js#L442)
 
 Disable the choice at the given `idx`.
 
@@ -254,7 +274,7 @@ Disable the choice at the given `idx`.
 choices.uncheck(1);
 ```
 
-### [.isChecked](index.js#L450)
+### [.isChecked](index.js#L473)
 
 Returns true if a choice is checked.
 
@@ -266,7 +286,7 @@ Returns true if a choice is checked.
 **Example**
 
 ```js
-var choices = new Choices(['foo', 'bar', 'baz']);
+const choices = new Choices(['foo', 'bar', 'baz']);
 console.log(choices.isChecked('foo'));
 //=> false
 choices.check('foo');
@@ -274,7 +294,7 @@ console.log(choices.isChecked('foo'));
 //=> true
 ```
 
-### [.toggle](index.js#L478)
+### [.toggle](index.js#L501)
 
 Toggle the choice at the given `idx`.
 
@@ -290,7 +310,7 @@ choices.toggle(1);
 choices.toggle(1, true);
 ```
 
-### [.swap](index.js#L586)
+### [.swap](index.js#L609)
 
 Swap two choices in the choices array.
 
@@ -300,7 +320,7 @@ Swap two choices in the choices array.
 * `b` **{String|Number}**
 * `returns` **{Object}**: Returns the `Choices` instance
 
-### [.where](index.js#L602)
+### [.where](index.js#L625)
 
 Return choice values for choices that return truthy based
 on the given `val`.
@@ -310,7 +330,7 @@ on the given `val`.
 * `val` **{Array|Object|Function|String|RegExp}**
 * `returns` **{Array}**: Matching choices or empty array
 
-### [.isItem](index.js#L650)
+### [.isItem](index.js#L673)
 
 Returns true if the given `choice` is a valid choice item, and
 not a "group" or "radio" choice.
@@ -320,7 +340,7 @@ not a "group" or "radio" choice.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.isValidIndex](index.js#L665)
+### [.isValidIndex](index.js#L688)
 
 Returns true if the given `index` is a valid choice index.
 
@@ -329,7 +349,7 @@ Returns true if the given `index` is a valid choice index.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.pluck](index.js#L676)
+### [.pluck](index.js#L699)
 
 Pluck an object with the specified key from the choices collection.
 
@@ -338,19 +358,19 @@ Pluck an object with the specified key from the choices collection.
 * `key` **{String}**: Property name to use for plucking objects.
 * `returns` **{Array}**: Plucked objects
 
-### [.default](index.js#L712)
+### [.default](index.js#L735)
 
 Getter for getting the default choice.
 
-### [.checked](index.js#L743)
+### [.checked](index.js#L762)
 
 Getter for getting the checked choices from the collection.
 
-### [.length](index.js#L785)
+### [.length](index.js#L804)
 
 Getter for getting the length of the collection.
 
-### [.Separator](index.js#L805)
+### [.Separator](index.js#L824)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -365,7 +385,7 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 new Choices.Separator();
 ```
 
-### [.isChoices](index.js#L821)
+### [.isChoices](index.js#L840)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -377,13 +397,13 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 **Example**
 
 ```js
-var Choices = require('prompt-choices');
-var choices = new Choices(['foo']);
+const Choices = require('prompt-choices');
+const choices = new Choices(['foo']);
 console.log(Choices.isChoices(choices)); //=> true
 console.log(Choices.isChoices({})); //=> false
 ```
 
-### [.isChoice](index.js#L840)
+### [.isChoice](index.js#L859)
 
 Create a new `Separator` object. See [choices-separator](https://github.com/enquirer/choices-separator) for more details.
 
@@ -395,9 +415,9 @@ Create a new `Separator` object. See [choices-separator](https://github.com/enqu
 **Example**
 
 ```js
-var Choices = require('prompt-choices');
-var choices = new Choices(['foo']);
-var foo = choices.getChoice('foo');
+const Choices = require('prompt-choices');
+const choices = new Choices(['foo']);
+const foo = choices.getChoice('foo');
 console.log(Choices.isChoice(foo)); //=> true
 console.log(Choices.isChoice({})); //=> false
 ```
@@ -444,6 +464,37 @@ Some of the code in this library was initially based on the `Choices` class in I
 
 ## About
 
+<details>
+<summary><strong>Contributing</strong></summary>
+
+Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
+
+</details>
+
+<details>
+<summary><strong>Running Tests</strong></summary>
+
+Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
+
+```sh
+$ npm install && npm test
+```
+
+</details>
+
+<details>
+<summary><strong>Building docs</strong></summary>
+
+_(This project's readme.md is generated by [verb](https://github.com/verbose/verb-generate-readme), please don't edit the readme directly. Any changes to the readme must be made in the [.verb.md](.verb.md) readme template.)_
+
+To generate the readme, run the following command:
+
+```sh
+$ npm install -g verbose/verb#dev verb-generate-readme && verb
+```
+
+</details>
+
 ### Related projects
 
 You might also be interested in these projects:
@@ -454,40 +505,19 @@ You might also be interested in these projects:
 * [prompt-question](https://www.npmjs.com/package/prompt-question): Question object, used by Enquirer and prompt plugins. | [homepage](https://github.com/enquirer/prompt-question "Question object, used by Enquirer and prompt plugins.")
 * [prompt-radio](https://www.npmjs.com/package/prompt-radio): Radio prompt. Can be used as a standalone prompt, or as a plugin for [Enquirer]. | [homepage](https://github.com/enquirer/prompt-radio "Radio prompt. Can be used as a standalone prompt, or as a plugin for [Enquirer].")
 
-### Contributing
-
-Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
-
-### Building docs
-
-_(This project's readme.md is generated by [verb](https://github.com/verbose/verb-generate-readme), please don't edit the readme directly. Any changes to the readme must be made in the [.verb.md](.verb.md) readme template.)_
-
-To generate the readme, run the following command:
-
-```sh
-$ npm install -g verbose/verb#dev verb-generate-readme && verb
-```
-
-### Running tests
-
-Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
-
-```sh
-$ npm install && npm test
-```
-
 ### Author
 
 **Jon Schlinkert**
 
-* [github/jonschlinkert](https://github.com/jonschlinkert)
-* [twitter/jonschlinkert](https://twitter.com/jonschlinkert)
+* [LinkedIn Profile](https://linkedin.com/in/jonschlinkert)
+* [GitHub Profile](https://github.com/jonschlinkert)
+* [Twitter Profile](https://twitter.com/jonschlinkert)
 
 ### License
 
-Copyright © 2017, [Jon Schlinkert](https://github.com/jonschlinkert).
+Copyright © 2018, [Jon Schlinkert](https://github.com/jonschlinkert).
 Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on August 28, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on May 28, 2018._
