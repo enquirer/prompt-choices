@@ -63,7 +63,7 @@ Choices.prototype.render = function(position, options) {
     if (opts && typeof opts.renderChoice === 'function') {
       buf += opts.renderChoice.call(this, this.position, choice, opts);
     } else {
-      buf += choice.render(this.position, opts);
+      buf += this.renderChoice(choice, this.position, opts);
     }
   }
 
